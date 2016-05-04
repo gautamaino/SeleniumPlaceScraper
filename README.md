@@ -1,0 +1,3 @@
+# SeleniumPlaceScraper
+
+Documents for scraping
