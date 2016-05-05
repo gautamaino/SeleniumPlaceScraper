@@ -7,9 +7,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 /**
- * 
  * @author tushar@ainosoft.com
- *
  */
 public class ScraperLogger {
 
@@ -21,33 +19,32 @@ public class ScraperLogger {
 	private FileHandler fileHandler;
 
 	public ScraperLogger(){
-		
+
 	}
-	
+
 	public ScraperLogger(String fileName){
 		try {
 			loggerFileName = fileName;
-			
+
 			loggerFile = new File(fileName);
-			
+
 			boolean fileExists = loggerFile.exists();
 			if(fileExists){
 				loggerFile.delete();
 				loggerFile = new File(fileName);
 			}
-			
+
 			fileHandler = new FileHandler(fileName,true);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		logger.addHandler(fileHandler);
 		SimpleFormatter simpleFormatter = new SimpleFormatter();
 		fileHandler.setFormatter(simpleFormatter);
 	}
-	
-	
+
 	/**
 	 * This method will print the message.
 	 */
@@ -62,11 +59,9 @@ public class ScraperLogger {
 		logger.log(Level.SEVERE, str,ex);
 	}
 
-
 	public static String getLoggerFileName() {
 		return loggerFileName;
 	}
-
 
 	public static void setLoggerFileName(String loggerFileName) {
 		ScraperLogger.loggerFileName = loggerFileName;
