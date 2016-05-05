@@ -1,47 +1,38 @@
 package com.ainosoft.seleniumplacescraper.manager;
 
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
-import com.ainosoft.seleniumplacescraper.scraper.ProxyScraper;
+
+
 
 /**
  * @author nalanda@ainosoft.com
  *
  */
-public class ProxyManager implements ProxyScraper {
-
-	private Logger logger = Logger.getLogger(this.getClass().getName());
+public class ProxyManager implements Manager {
 
 	@Override
-	public void startProxyScraping() {
-		try {
-			ProxyScraperHelper proxyHelper = new ProxyScraperHelper();
-			
-			proxyHelper.startProxyScraping();
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, "ProxyManager :: startProxyScraping() ::",e);
-		}
-	}
-
-	@Override
-	public ArrayList<ProxyDetailsPojo> getListOfProxies() {
-		try {
-
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, "ProxyManager :: startProxyScraping() ::",e);
-		}
+	public void initializeAndStart(String url, String textToSearch) {
+/*		googleMapScraper = new GoogleMapScraper();
+		
+		googleMapScraper.setTextToSearch(textToSearch);
+		googleMapScraper.setUrl(url);
+		
+		ArrayList<PlacesDetailsPojo> placesDetailsPojoList = googleMapScraper.getScrapperDataList();
+		//Text to search
+		
+		//Site to search
+		//get proxy list from db
+		
+		//fetch data list frommscraper
+		
+		
+		//Save buld list to db	
+*/	}
+	
+	public ArrayList<ProxyDetailsPojo> getValidProxyList(){
 		return null;
-	}
-
-	@Override
-	public void getValidProxy() {
-		try {
-
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, "ProxyManager :: startProxyScraping() ::",e);
-		}
+		
 	}
 }
