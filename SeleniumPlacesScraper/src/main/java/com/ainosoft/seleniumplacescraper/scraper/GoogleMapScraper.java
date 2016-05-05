@@ -3,6 +3,7 @@ package com.ainosoft.seleniumplacescraper.scraper;
 import java.util.ArrayList;
 
 import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
+import com.ainosoft.seleniumplacescraper.util.PageState;
 
 /**
  * 
@@ -11,20 +12,28 @@ import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
  */
 public class GoogleMapScraper implements Scraper {
 	
-	String url,searchText;
+	private String url,searchText;
 
-	public ArrayList<PlacesDetailsPojo> getScrapperDataList() {
+	@Override
+	public ArrayList<PlacesDetailsPojo> startScrapingFetchList() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
 	public void setUrl(String url) {
-		// TODO Auto-generated method stub
 		this.url = url;
 	}
 
-	public void setTextToSearch(String textToSearch) {
-		// TODO Auto-generated method stub
-		searchText = textToSearch;
+	@Override
+	public void setTextToSearch(String textToScrape) {
+		this.searchText = textToScrape;
 	}
+
+	@Override
+	public ArrayList<PlacesDetailsPojo> reRunScraping(PageState pageState) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

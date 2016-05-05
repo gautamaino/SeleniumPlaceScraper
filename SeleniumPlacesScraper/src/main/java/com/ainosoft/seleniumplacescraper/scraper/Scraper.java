@@ -1,12 +1,23 @@
 package com.ainosoft.seleniumplacescraper.scraper;
 
+import java.util.ArrayList;
 
+import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
+import com.ainosoft.seleniumplacescraper.util.PageState;
+
+/**
+ * 
+ * @author tushar@ainosoft.com
+ *
+ */
 public interface Scraper {
 
-	//public ArrayList<PlacesDeatils> getScrapperDataList();
+	public ArrayList<PlacesDetailsPojo> startScrapingFetchList();
 	
-	//public void setUrl();
+	public ArrayList<PlacesDetailsPojo> reRunScraping(PageState pageState);
 	
-	//public void setTextToSearch();
+	public void setUrl(String url);
+	
+	public void setTextToSearch(String textToScrape);
 	
 }
