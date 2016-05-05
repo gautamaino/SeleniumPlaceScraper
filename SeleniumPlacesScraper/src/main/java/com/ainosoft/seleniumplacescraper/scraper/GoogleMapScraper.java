@@ -27,5 +27,4 @@ public class GoogleMapScraper implements Scraper {
 		// TODO Auto-generated method stub
 		searchText = textToSearch;
 	}
-
 }

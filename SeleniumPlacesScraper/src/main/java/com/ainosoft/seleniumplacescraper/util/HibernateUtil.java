@@ -7,21 +7,19 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 /**
- * 
  * @author tushar@ainosoft.com
- *
  */
 public class HibernateUtil {
 
 	private static SessionFactory sessionFactory;
 	private static Configuration config;
-	
+
 	private static Logger logger = Logger.getLogger(HibernateUtil.class.getName());
 
 	public HibernateUtil() {
 
 	}
-	
+
 	static {
 		try {
 			config = new Configuration().configure("/hibernate.cfg.xml");
