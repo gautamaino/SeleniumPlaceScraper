@@ -1,13 +1,14 @@
 package com.ainosoft.seleniumplacescraper.pojo;
 
-// default package
 // Generated 4 May, 2016 4:15:46 PM by Hibernate Tools 3.4.0.CR1
 
+import static javax.persistence.GenerationType.IDENTITY;
+
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import static javax.persistence.GenerationType.IDENTITY;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -130,5 +131,4 @@ public class ProxyDetailsPojo implements java.io.Serializable {
 	public void setModifiedOn(Date modifiedOn) {
 		this.modifiedOn = modifiedOn;
 	}
-
 }
