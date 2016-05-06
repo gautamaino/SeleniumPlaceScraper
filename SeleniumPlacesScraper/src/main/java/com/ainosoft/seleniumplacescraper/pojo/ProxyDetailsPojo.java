@@ -25,7 +25,6 @@ public class ProxyDetailsPojo implements java.io.Serializable {
 	private String ipAddress;
 	private String ipPort;
 	private String ipAddressAndPort;
-	private String country;
 	private Boolean status;
 	private String url;
 	private Date createdOn;
@@ -35,12 +34,11 @@ public class ProxyDetailsPojo implements java.io.Serializable {
 	}
 
 	public ProxyDetailsPojo(String ipAddress, String ipPort,
-			String ipAddressAndPort, String country, Boolean status,
+			String ipAddressAndPort, Boolean status,
 			String url, Date createdOn, Date modifiedOn) {
 		this.ipAddress = ipAddress;
 		this.ipPort = ipPort;
 		this.ipAddressAndPort = ipAddressAndPort;
-		this.country = country;
 		this.status = status;
 		this.url = url;
 		this.createdOn = createdOn;
@@ -85,15 +83,6 @@ public class ProxyDetailsPojo implements java.io.Serializable {
 		this.ipAddressAndPort = ipAddressAndPort;
 	}
 
-	@Column(name = "country", length = 45)
-	public String getCountry() {
-		return this.country;
-	}
-
-	public void setCountry(String country) {
-		this.country = country;
-	}
-
 	@Column(name = "status")
 	public Boolean getStatus() {
 		return this.status;
@@ -113,7 +102,7 @@ public class ProxyDetailsPojo implements java.io.Serializable {
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "created_on", length = 19)
+	@Column(name = "created_on", length = 19, nullable = false)
 	public Date getCreatedOn() {
 		return this.createdOn;
 	}
