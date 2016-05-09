@@ -1,6 +1,7 @@
 package com.ainosoft.seleniumplacescraper.manager;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
@@ -37,15 +38,19 @@ public class ProxyManager implements Manager {
 	}
 
 	public ArrayList<ProxyDetailsPojo> getValidProxyList(){
+		ArrayList<ProxyDetailsPojo> proxyList = null;
 		try {
-			ArrayList<ProxyDetailsPojo> validProxyList = proxyDao.getValidProxyList();
-			return validProxyList;
+			proxyList = new ArrayList<ProxyDetailsPojo>();
+			List<ProxyDetailsPojo> validProxyList = proxyDao.getValidProxyList();
+			for(ProxyDetailsPojo proxyPojo : validProxyList){
+				proxyList.add(proxyPojo);
+			}
 		} catch (Exception e) {
 			ScraperLogger.log("ProxyManager :: getValidProxyList() ::",e); 
 		}
-		return null;
+		return proxyList;
 	}
-	
+
 	public void updateProxyStatus(ArrayList<ProxyDetailsPojo> proxyPojoList){ 
 		try {
 			proxyDao.updateProxyStatus(proxyPojoList);
