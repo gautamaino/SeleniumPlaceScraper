@@ -10,6 +10,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 
+import com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
@@ -27,16 +28,54 @@ public class ProxyScraper implements Scraper{
 
 	WebDriver driver;
 
-	String serverIp = "46.165.228.164";
-	int serverPort = 3128 , time = 3000;
+	int time = 3000;
 
 	List<WebElement> proxyList = new ArrayList<WebElement>(); 
 
-	ArrayList<ProxyDetailsPojo> proxyPojoList ;
+	ArrayList<ProxyDetailsPojo> proxyPojoList;
+	ArrayList<ProxyDetailsPojo> invalidProxyList;
+
+	ProxyDetailsDao proxyDao = new ProxyDetailsDao();
+
+	FirefoxProfile profile;
 
 	@Override
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public FirefoxProfile createProfile(){
+		invalidProxyList = new ArrayList<ProxyDetailsPojo>();
+		try {
+			List<ProxyDetailsPojo> validProxyList = proxyDao.getValidProxyList();
+			if(validProxyList!=null){
+				if(!validProxyList.isEmpty()){
+					if(validProxyList.get(0) instanceof ProxyDetailsPojo){
+						for(ProxyDetailsPojo proxyPojo : validProxyList){
+							String serverIp = proxyPojo.getIpAddress();
+							Integer serverPort = Integer.parseInt(proxyPojo.getIpPort());
+
+							boolean status = checkForValidIp(serverIp);
+							if(status){
+								profile = new FirefoxProfile();  
+
+								profile.setPreference("network.proxy.type",1);
+								profile.setPreference("network.proxy.http",serverIp); 
+								profile.setPreference("network.proxy.http_port",serverPort); 
+								profile.setPreference("browser.privatebrowsing.autostart",true);
+								break;
+							}else{
+								invalidProxyList.add(proxyPojo);
+								proxyDao.updateProxyStatus(invalidProxyList);
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			ScraperLogger.log("ProxyManager :: createProfile() ::",e); 
+		}
+		return profile;
 	}
 
 	@Override
@@ -44,14 +83,9 @@ public class ProxyScraper implements Scraper{
 		try {
 			proxyPojoList = new ArrayList<ProxyDetailsPojo>();
 
-			FirefoxProfile profile = new FirefoxProfile();  
+			FirefoxProfile proxyProfile = createProfile();
 
-			profile.setPreference("network.proxy.type",1);
-			profile.setPreference("network.proxy.http",serverIp); 
-			profile.setPreference("network.proxy.http_port",serverPort); 
-			profile.setPreference("browser.privatebrowsing.autostart",true);
-
-			driver = new FirefoxDriver(profile);
+			driver = new FirefoxDriver(proxyProfile);
 			driver.get("http://whatismyipaddress.com/");
 			Thread.sleep(time);
 
@@ -81,15 +115,16 @@ public class ProxyScraper implements Scraper{
 
 				boolean status = checkForValidIp(textArray[0]);
 
-				if(status == true){
-					ProxyDetailsPojo proxyPojo = new ProxyDetailsPojo();
-					proxyPojo.setIpAddressAndPort(ipAddress);
-					proxyPojo.setIpAddress(textArray[0]);
-					proxyPojo.setIpPort(textArray[1]);
-					proxyPojo.setUrl(url);
-					proxyPojo.setStatus(true);
+				if(status){
+					ProxyDetailsPojo proxyPojoToSave = new ProxyDetailsPojo();
+					proxyPojoToSave.setIpAddressAndPort(ipAddress);
+					proxyPojoToSave.setIpAddress(textArray[0]);
+					proxyPojoToSave.setIpPort(textArray[1]);
+					proxyPojoToSave.setUrl(url);
+					proxyPojoToSave.setStatus(true);
 
-					proxyPojoList.add(proxyPojo);
+					proxyPojoList.add(proxyPojoToSave);
+
 				}
 			}
 		} catch (Exception e) {
