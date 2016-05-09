@@ -4,6 +4,7 @@ package com.ainosoft.seleniumplacescraper.dao;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -68,25 +69,6 @@ public class ProxyDetailsDao {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public ArrayList<ProxyDetailsPojo> getValidProxyList() {
-		ArrayList<ProxyDetailsPojo> proxyDetailsPojoList = null;
-		Session session=null;
-		try{
-			session = HibernateUtil.getSessionFactory().openSession();
-			Query query = session.createSQLQuery("select * from ProxyDetails where status = 1");
-			proxyDetailsPojoList = (ArrayList<ProxyDetailsPojo>) query.list();
-		}catch(Exception e){
-			ScraperLogger.log("ProxyManager :: getValidProxyList() ::",e); 
-		}finally{
-			if(session != null){
-				session.flush();
-				session.close();
-			}
-		}
-		return (ArrayList<ProxyDetailsPojo>) proxyDetailsPojoList;
-	}
-
 	public void updateProxyStatus(ArrayList<ProxyDetailsPojo> proxyPojoList) {
 		Session session=null;
 		Transaction transaction= null;
@@ -103,6 +85,26 @@ public class ProxyDetailsDao {
 			ScraperLogger.log("ProxyManager :: updateProxyStatus() ::",re); 
 			transaction.rollback();
 			throw re;
+		}finally{
+			if(session != null){
+				session.flush();
+				session.close();
+			}
+		}
+	}
+
+	public List<ProxyDetailsPojo> getValidProxyList() throws Exception {
+		Session session=null;
+		try{
+			session = HibernateUtil.getSessionFactory().openSession();
+			Query query = session.createQuery("from ProxyDetailsPojo where status = 1");
+
+			List<ProxyDetailsPojo> proxyDetailsPojoList = query.list();
+
+			return proxyDetailsPojoList;
+		}catch(Exception e){
+			ScraperLogger.log("ProxyManager :: updateProxyStatus() ::",e); 
+			throw e;
 		}finally{
 			if(session != null){
 				session.flush();

@@ -13,13 +13,12 @@ import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 public interface Scraper {
 
 	public ArrayList<PlacesDetailsPojo> startScrapingFetchList();
-	
-	public ArrayList<ProxyDetailsPojo> startScrapingFetchProxyList();
-	
-	public ArrayList<PlacesDetailsPojo> reRunScraping(int pageCount);
-	
-	public void setUrl(String url);
-	
-	public void setTextToSearch(String textToScrape);
 
+	public ArrayList<ProxyDetailsPojo> startScrapingFetchProxyList();
+
+	public ArrayList<PlacesDetailsPojo> reRunScraping(int pageCount);
+
+	public void setUrl(String url);
+
+	public void setTextToSearch(String textToScrape);
 }
