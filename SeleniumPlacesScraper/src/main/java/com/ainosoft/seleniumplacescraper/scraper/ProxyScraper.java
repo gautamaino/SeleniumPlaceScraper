@@ -12,7 +12,6 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 
 import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
-import com.ainosoft.seleniumplacescraper.util.PageState;
 import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 
 
@@ -104,7 +103,7 @@ public class ProxyScraper implements Scraper{
 		return proxyPojoList;
 	}
 
-	private boolean checkForValidIp(String ipAddress) {
+	public boolean checkForValidIp(String ipAddress) {
 		boolean connectionStatus = false;
 		try {
 			//here type proxy server ip
@@ -124,7 +123,7 @@ public class ProxyScraper implements Scraper{
 	}
 
 	@Override
-	public ArrayList<PlacesDetailsPojo> reRunScraping(PageState pageState) {
+	public ArrayList<PlacesDetailsPojo> reRunScraping(int pageCount) {
 		return null;
 	}
 
