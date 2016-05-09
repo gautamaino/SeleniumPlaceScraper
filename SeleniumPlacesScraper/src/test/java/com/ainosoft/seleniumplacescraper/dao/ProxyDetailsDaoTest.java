@@ -6,6 +6,7 @@ package com.ainosoft.seleniumplacescraper.dao;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -54,7 +55,7 @@ public class ProxyDetailsDaoTest {
 		try {
 			ProxyDetailsDao proxyDao = new ProxyDetailsDao();
 
-			ArrayList<ProxyDetailsPojo> validProxyList = proxyDao.getValidProxyList();
+			List<ProxyDetailsPojo> validProxyList = proxyDao.getValidProxyList();
 
 			assertTrue(validProxyList!=null);
 			assertTrue(!validProxyList.isEmpty());
