@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+		"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+		"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory name="SeleniumPlacesScraper">
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="hibernate.connection.password">mysql</property>
+		<property name="hibernate.connection.url">jdbc:mysql://10.10.10.102:3306/SeleniumPlacesScraper</property>
+		<property name="hibernate.connection.username">root</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</property>
+		<property name="javax.persistence.validation.mode">none</property>
+		<property name="hibernate.jdbc.batch_size">20</property>
+
+		<mapping class="com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo" />
+		<mapping class="com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo" />
+
+	</session-factory>
+</hibernate-configuration>
