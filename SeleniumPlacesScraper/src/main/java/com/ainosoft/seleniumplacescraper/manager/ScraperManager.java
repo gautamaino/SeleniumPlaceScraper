@@ -12,7 +12,6 @@ import com.ainosoft.seleniumplacescraper.dao.PlacesDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 import com.ainosoft.seleniumplacescraper.scraper.GoogleMapScraper;
-import com.ainosoft.seleniumplacescraper.scraper.ProxyScraper;
 import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 
 
@@ -25,10 +24,10 @@ public class ScraperManager implements Manager{
 
 	private ScraperLogger scraperLogger = new ScraperLogger("googlemaps");
 
-	private static int pageCount = 0;
 	private boolean pageValidation = false;
 
-	public void initializeAndStart(String url,String textToSearch){
+	public void initializeAndStart(String url,String textToSearch,String city){
+		int pageCount = 0;
 		GoogleMapScraper googleMapScraper = null;
 		PlacesDetailsDao placesDetailsDao = null;
 		WebDriver fireFoxWebDriver = null;
@@ -36,14 +35,12 @@ public class ScraperManager implements Manager{
 			googleMapScraper = new GoogleMapScraper();
 			placesDetailsDao = new PlacesDetailsDao();
 
-			scraperLogger.log("-------------------------------------------------------------------------------");
 			scraperLogger.log("Initializating scraping...");
-			scraperLogger.log("-------------------------------------------------------------------------------");
 
 			fireFoxWebDriver = getFireFoxDriver();
 
-			//fireFoxWebDriver.get("http://whatismyipaddress.com/");
-			//Thread.sleep(5000);
+			fireFoxWebDriver.get("http://whatismyipaddress.com/");
+			Thread.sleep(5000);
 
 			// Launch website
 			fireFoxWebDriver.navigate().to(url);
@@ -55,8 +52,8 @@ public class ScraperManager implements Manager{
 			// Enter value 50 in the second number of the percent Calculator
 			WebElement searchTextBox = fireFoxWebDriver.findElement(By.xpath(".//*[@id='searchboxinput']"));
 
-			searchTextBox.sendKeys(textToSearch);
-
+			searchTextBox.sendKeys(textToSearch+"in"+city);
+			
 			Thread.sleep(5000);
 
 			// Click search Button
@@ -69,7 +66,8 @@ public class ScraperManager implements Manager{
 			boolean flag = false;
 			while (true) {
 				googleMapScraper.setFireFoxWebDriver(fireFoxWebDriver);
-
+				googleMapScraper.setCity(city);
+				
 				if(flag){
 					try {
 						WebElement nextButton = fireFoxWebDriver.findElement(By.xpath(".//*[@id='widget-pane-section-pagination-button-next']"));
@@ -77,9 +75,11 @@ public class ScraperManager implements Manager{
 						pageCount++;											
 					} catch (Exception e) {
 						if(e.equals("NoSuchElementException")){
+							googleMapScraper.setCity(city);
+							
 							WebDriver fireFoxDriverForReRun = getFireFoxDriver();
 							googleMapScraper.setFireFoxWebDriver(fireFoxDriverForReRun);
-							
+
 							ArrayList<PlacesDetailsPojo> placesDetailsPojoList1 = googleMapScraper.reRunScraping(pageCount);
 							for (PlacesDetailsPojo placesDetailsPojo : placesDetailsPojoList1) {
 								placesDetailsDao.savePlacesDetailsPojo(placesDetailsPojo);
@@ -102,6 +102,7 @@ public class ScraperManager implements Manager{
 					pageCount++;
 				} catch (Exception e) {
 					if(e.equals("NoSuchElementException")){
+						googleMapScraper.setCity(city);
 						WebDriver fireFoxDriverForReRun = getFireFoxDriver();
 						googleMapScraper.setFireFoxWebDriver(fireFoxDriverForReRun);
 
@@ -122,7 +123,7 @@ public class ScraperManager implements Manager{
 		}
 	}
 
-	
+
 	/**
 	 * This method is use to get new instance of WebDriver.
 	 * @return WebDriver
@@ -155,24 +156,18 @@ public class ScraperManager implements Manager{
 	 * @return ProxyDetailsPojo
 	 */
 	public ProxyDetailsPojo getValidProxy(){
-		ProxyScraper proxyScraper = null;
+		ProxyManager proxyManger = null;
 		ProxyDetailsPojo proxyPojo = null;
 		try {
-			proxyScraper = new ProxyScraper();
-			
-			proxyScraper.setUrl("http://www.ip-adress.com/proxy_list/");
-			ArrayList<ProxyDetailsPojo> proxyDetailPojoList = proxyScraper.startScrapingFetchProxyList();
+			proxyManger = new ProxyManager();
+
+			ArrayList<ProxyDetailsPojo> proxyDetailPojoList = proxyManger.getValidProxyList();
 			if(proxyDetailPojoList!=null){
 				if(!proxyDetailPojoList.isEmpty()){
 					for (ProxyDetailsPojo proxyDetailsPojo : proxyDetailPojoList) {
-						String serverIP = proxyDetailsPojo.getIpAddress();
-						Integer port = Integer.parseInt(proxyDetailsPojo.getIpPort());
-
-						boolean result = proxyScraper.checkForValidIp(serverIP);
-						if(result){
-							proxyPojo = proxyDetailsPojo;
-							break;
-						}
+						proxyPojo = new ProxyDetailsPojo();	
+						proxyPojo = proxyDetailsPojo;
+						break;
 					}
 				}
 			}
@@ -181,4 +176,6 @@ public class ScraperManager implements Manager{
 		}
 		return proxyPojo;
 	}
+	
+
 }

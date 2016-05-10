@@ -13,5 +13,5 @@ public interface Manager {
 	 * @param textToSearch: Text related to a particular topic for searching on the site provided 
 	 *                      via URL
 	 */
-	public void initializeAndStart(String url,String textToSearch);
+	public void initializeAndStart(String url,String textToSearch,String city);
 }

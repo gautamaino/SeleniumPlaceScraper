@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import org.junit.Test;
 
-import com.ainosoft.seleniumplacescraper.dao.PlacesDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
 
 /**
@@ -37,7 +36,6 @@ public class PlacesDetailsDaoTest {
 			placesDetailsPojo.setPlaceName("xyz");
 			placesDetailsPojo.setPlacePhoneNo("555");
 			placesDetailsPojo.setPlaceType("lmn");
-
 			
 			PlacesDetailsPojo savedRestaurantDetailData = placesDetailsDao.savePlacesDetailsPojo(placesDetailsPojo);
 			

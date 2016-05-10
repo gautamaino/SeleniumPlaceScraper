@@ -20,7 +20,7 @@ public class ProxyManager implements Manager {
 	ProxyScraper proxyScraper = new ProxyScraper();
 
 	@Override
-	public void initializeAndStart(String url, String textToSearch) {
+	public void initializeAndStart(String url, String textToSearch,String city) {
 		try {
 			proxyScraper.setUrl(url);
 

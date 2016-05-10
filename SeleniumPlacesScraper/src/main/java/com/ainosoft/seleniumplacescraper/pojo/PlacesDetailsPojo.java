@@ -2,11 +2,13 @@ package com.ainosoft.seleniumplacescraper.pojo;
 // default package
 // Generated 5 May, 2016 3:02:05 PM by Hibernate Tools 3.4.0.CR1
 
+import static javax.persistence.GenerationType.IDENTITY;
+
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import static javax.persistence.GenerationType.IDENTITY;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -171,7 +173,7 @@ public class PlacesDetailsPojo implements java.io.Serializable {
 		this.rating = rating;
 	}
 
-	@Column(name = "web_element", length = 65535)
+	@Column(name = "web_element")
 	public String getWebElement() {
 		return this.webElement;
 	}

@@ -1,6 +1,6 @@
 package com.ainosoft.seleniumplacescraper;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
