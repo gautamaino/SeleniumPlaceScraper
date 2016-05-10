@@ -23,8 +23,9 @@ public class HibernateUtil {
 	static {
 		try {
 			config = new Configuration().configure("/hibernate.cfg.xml");
+			
 		} catch (final Throwable th) {
-			logger.log(Level.SEVERE, "from HibernateUtil", th);
+			logger.log(Level.SEVERE, "from HibernateUtil static block", th);
 		}
 	}
 

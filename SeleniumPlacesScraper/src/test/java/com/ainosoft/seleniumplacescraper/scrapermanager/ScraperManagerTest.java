@@ -1,8 +1,6 @@
 package com.ainosoft.seleniumplacescraper.scrapermanager;
 
-import javax.validation.constraints.AssertTrue;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
@@ -42,7 +40,7 @@ public class ScraperManagerTest {
 			googleMapScraper.setTextToSearch("restaurants in pune");
 			googleMapScraper.setUrl("https://www.google.co.in/maps");
 			
-			googleMapScraper.reRunScraping(3);
+			googleMapScraper.reRunScraping(8);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
