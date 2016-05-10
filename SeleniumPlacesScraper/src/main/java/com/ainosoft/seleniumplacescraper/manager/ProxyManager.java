@@ -10,6 +10,8 @@ import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 
 /**
  * @author nalanda@ainosoft.com
+ * This is the Proxy Manager class which handle saving , retrieval and updation of proxy related 
+ * methods
  */
 public class ProxyManager implements Manager {
 
@@ -19,17 +21,19 @@ public class ProxyManager implements Manager {
 	ProxyDetailsDao proxyDao = new ProxyDetailsDao();
 	ProxyScraper proxyScraper = new ProxyScraper();
 
+	/**
+	 * This method accepts two parameters the site to scrape data from and the data to be scraped
+	 */
 	@Override
-	public void initializeAndStart(String url, String textToSearch,String city) {
+	public void initializeAndStart(String url, String textToSearch, String city) {
 		try {
 			proxyScraper.setUrl(url);
 
 			ArrayList<ProxyDetailsPojo> proxyPojoList = proxyScraper.startScrapingFetchProxyList();
 			if(proxyPojoList!=null){
 				if(!proxyPojoList.isEmpty()){
-					for(ProxyDetailsPojo proxyPojo : proxyPojoList){
-						proxyDao.saveProxyPojo(proxyPojo);
-					}
+					Thread dataEntrymaker = new Thread(new DataEntryMaker(proxyPojoList));
+					dataEntrymaker.start();
 				}
 			}
 		} catch (Exception e) {
@@ -37,6 +41,10 @@ public class ProxyManager implements Manager {
 		}
 	}
 
+	/**
+	 * This method returns list of valid proxies from database
+	 * @return
+	 */
 	public ArrayList<ProxyDetailsPojo> getValidProxyList(){
 		ArrayList<ProxyDetailsPojo> proxyList = null;
 		try {
@@ -51,6 +59,10 @@ public class ProxyManager implements Manager {
 		return proxyList;
 	}
 
+	/**
+	 * This method updates the status of proxy if it is found to be invalid i.e not reachable
+	 * @param proxyPojoList
+	 */
 	public void updateProxyStatus(ArrayList<ProxyDetailsPojo> proxyPojoList){ 
 		try {
 			proxyDao.updateProxyStatus(proxyPojoList);
