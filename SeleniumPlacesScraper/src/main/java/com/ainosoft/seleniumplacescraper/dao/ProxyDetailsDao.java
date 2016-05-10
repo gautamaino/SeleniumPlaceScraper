@@ -27,6 +27,10 @@ public class ProxyDetailsDao {
 
 	private final SessionFactory sessionFactory = getSessionFactory();
 
+	/**
+	 * This methods creates a session for connecting to the database
+	 * @return
+	 */
 	protected SessionFactory getSessionFactory() {
 		try {
 			return HibernateUtil.getSessionFactory();
@@ -36,6 +40,11 @@ public class ProxyDetailsDao {
 		return sessionFactory;
 	}
 
+	/**
+	 * This methods saves a proxy pojo to database
+	 * @param proxyPojo
+	 * @return
+	 */
 	public ProxyDetailsPojo saveProxyPojo(ProxyDetailsPojo proxyPojo) {
 		Session session=null;
 		Transaction transaction= null;
@@ -69,6 +78,10 @@ public class ProxyDetailsDao {
 		}
 	}
 
+	/**
+	 * This method updates the status of a proxy if it is found to be invalid
+	 * @param proxyPojoList
+	 */
 	public void updateProxyStatus(ArrayList<ProxyDetailsPojo> proxyPojoList) {
 		Session session=null;
 		Transaction transaction= null;
@@ -93,6 +106,11 @@ public class ProxyDetailsDao {
 		}
 	}
 
+	/**
+	 * This method returns arraylist of valid proxies
+	 * @return
+	 * @throws Exception
+	 */
 	public List<ProxyDetailsPojo> getValidProxyList() throws Exception {
 		Session session=null;
 		try{
@@ -105,6 +123,33 @@ public class ProxyDetailsDao {
 		}catch(Exception e){
 			ScraperLogger.log("ProxyManager :: updateProxyStatus() ::",e); 
 			throw e;
+		}finally{
+			if(session != null){
+				session.flush();
+				session.close();
+			}
+		}
+	}
+
+	public void saveProxyListToDatabase(ArrayList<ProxyDetailsPojo> proxyPojoList) {
+		Session session=null;
+		Transaction transaction= null;
+		try {
+			session = HibernateUtil.getSessionFactory().openSession();
+			transaction = session.beginTransaction();
+			for (int i=0; i<proxyPojoList.size(); i++){
+				for(ProxyDetailsPojo proxyPojo : proxyPojoList){
+					session.save(proxyPojo);
+					if( i % 20 == 0 ) { 
+						// Same as the JDBC batch size flush a batch of inserts and release memory:
+						session.flush();
+						session.clear();
+					}
+				}
+			}
+			transaction.commit();
+		} catch (Exception e) {
+			ScraperLogger.log("ProxyManager :: saveProxyListToDatabase() ::",e); 
 		}finally{
 			if(session != null){
 				session.flush();
