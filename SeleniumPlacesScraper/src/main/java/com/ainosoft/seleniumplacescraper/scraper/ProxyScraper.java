@@ -34,6 +34,7 @@ public class ProxyScraper implements Scraper{
 
 	ArrayList<ProxyDetailsPojo> proxyPojoList;
 	ArrayList<ProxyDetailsPojo> invalidProxyList;
+	List<ProxyDetailsPojo> validProxyList;
 
 	ProxyDetailsDao proxyDao = new ProxyDetailsDao();
 
@@ -44,10 +45,16 @@ public class ProxyScraper implements Scraper{
 		this.url = url;
 	}
 
+	/**
+	 * This method creates a profile for launching firefox browser using the credentials passed 
+	 * to it as profile parameters through a proxy
+	 * @return
+	 */
 	public FirefoxProfile createProfile(){
 		invalidProxyList = new ArrayList<ProxyDetailsPojo>();
+		validProxyList = new ArrayList<ProxyDetailsPojo>();
 		try {
-			List<ProxyDetailsPojo> validProxyList = proxyDao.getValidProxyList();
+			validProxyList = proxyDao.getValidProxyList();
 			if(validProxyList!=null){
 				if(!validProxyList.isEmpty()){
 					if(validProxyList.get(0) instanceof ProxyDetailsPojo){
@@ -78,8 +85,13 @@ public class ProxyScraper implements Scraper{
 		return profile;
 	}
 
+	/**
+	 * This method launches firefox browser search the site for the required data 
+	 * Scrapes the data and returns a list of data for saving to database
+	 */
 	@Override
 	public ArrayList<ProxyDetailsPojo> startScrapingFetchProxyList() {
+		ProxyDetailsPojo proxyPojoToSave = null;
 		try {
 			proxyPojoList = new ArrayList<ProxyDetailsPojo>();
 
@@ -116,7 +128,7 @@ public class ProxyScraper implements Scraper{
 				boolean status = checkForValidIp(textArray[0]);
 
 				if(status){
-					ProxyDetailsPojo proxyPojoToSave = new ProxyDetailsPojo();
+					proxyPojoToSave = new ProxyDetailsPojo();
 					proxyPojoToSave.setIpAddressAndPort(ipAddress);
 					proxyPojoToSave.setIpAddress(textArray[0]);
 					proxyPojoToSave.setIpPort(textArray[1]);
@@ -124,7 +136,6 @@ public class ProxyScraper implements Scraper{
 					proxyPojoToSave.setStatus(true);
 
 					proxyPojoList.add(proxyPojoToSave);
-
 				}
 			}
 		} catch (Exception e) {
@@ -138,6 +149,11 @@ public class ProxyScraper implements Scraper{
 		return proxyPojoList;
 	}
 
+	/**
+	 * This method is used for validating a proxy
+	 * @param ipAddress
+	 * @return
+	 */
 	public boolean checkForValidIp(String ipAddress) {
 		boolean connectionStatus = false;
 		try {
