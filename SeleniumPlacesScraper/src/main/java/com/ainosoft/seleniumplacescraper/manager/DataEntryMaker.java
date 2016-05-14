@@ -4,6 +4,8 @@
 package com.ainosoft.seleniumplacescraper.manager;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
@@ -18,7 +20,7 @@ public class DataEntryMaker implements Runnable {
 	ArrayList<ProxyDetailsPojo> proxyPojoList;
 
 	@SuppressWarnings("unused")
-	private static ScraperLogger scraperLogger = new ScraperLogger("DataEntryMaker");
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	public DataEntryMaker(ArrayList<ProxyDetailsPojo> proxyPojoList) {
 		this.proxyPojoList = proxyPojoList;
@@ -41,7 +43,7 @@ public class DataEntryMaker implements Runnable {
 				}
 			}
 		} catch (Exception e) {
-			ScraperLogger.log("DataEntryMaker :: run() ::",e); 
+			logger.log(Level.SEVERE,"DataEntryMaker :: run() ::",e); 
 		}
 	}
 }

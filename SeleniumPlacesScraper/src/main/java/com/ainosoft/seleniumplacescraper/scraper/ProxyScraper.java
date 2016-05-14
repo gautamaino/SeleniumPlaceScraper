@@ -3,6 +3,8 @@ package com.ainosoft.seleniumplacescraper.scraper;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -11,9 +13,8 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 
 import com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao;
-import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
-import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
+import com.ainosoft.seleniumplacescraper.pojo.SpaceInformationPojo;
 
 
 /**
@@ -22,7 +23,7 @@ import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 public class ProxyScraper implements Scraper{
 
 	@SuppressWarnings("unused")
-	private static ScraperLogger scraperLogger = new ScraperLogger("ProxyScraper");
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	private String url;
 
@@ -80,7 +81,7 @@ public class ProxyScraper implements Scraper{
 				}
 			}
 		} catch (Exception e) {
-			ScraperLogger.log("ProxyManager :: createProfile() ::",e); 
+			logger.log(Level.SEVERE,"ProxyManager :: createProfile() ::",e); 
 		}
 		return profile;
 	}
@@ -139,7 +140,7 @@ public class ProxyScraper implements Scraper{
 				}
 			}
 		} catch (Exception e) {
-			ScraperLogger.log("ProxyManager :: startScrapingFetchProxyList() ::",e); 
+			logger.log(Level.SEVERE,"ProxyManager :: startScrapingFetchProxyList() ::",e); 
 		}finally{
 			if(driver!=null){
 				driver.close();
@@ -161,21 +162,19 @@ public class ProxyScraper implements Scraper{
 			InetAddress addr = InetAddress.getByName(ipAddress);
 
 			// 1 second time for response
-			connectionStatus = addr.isReachable(1000); 
+			connectionStatus = addr.isReachable(2000); 
 		} catch (Exception e) {
-			ScraperLogger.log("ProxyManager :: checkForValidIp() ::",e);
+			logger.log(Level.SEVERE,"ProxyManager :: checkForValidIp() ::",e);
 		}
 		return connectionStatus;
 	}
 
 	@Override
-	public ArrayList<PlacesDetailsPojo> startScrapingFetchList() {
-		return null;
+	public void startScrapingFetchList() {
 	}
 
 	@Override
-	public ArrayList<PlacesDetailsPojo> reRunScraping(int pageCount) {
-		return null;
+	public void reRunScraping(SpaceInformationPojo spaceInfoPojo) {
 	}
 
 	@Override

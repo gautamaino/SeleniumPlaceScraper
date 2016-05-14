@@ -7,11 +7,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Test;
 
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
-import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 
 /**
  * @author nalanda
@@ -22,7 +23,7 @@ public class ProxyDetailsDaoTest {
 	ProxyDetailsDao proxyDao = new ProxyDetailsDao();
 
 	@SuppressWarnings("unused")
-	private static ScraperLogger scraperLogger = new ScraperLogger("ProxyDetailsDao");
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	/**
 	 * Test method for {@link com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao#saveProxyPojo(com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo)}.
@@ -43,7 +44,7 @@ public class ProxyDetailsDaoTest {
 			assertTrue(proxyPojoToSave.getIpAddressAndPort().equals("111.111.111.111:1111"));
 			assertTrue(proxyPojoToSave.getUrl().equals("abc@def.com"));
 		} catch (Exception e) {
-			ScraperLogger.log("ProxyDetailsDaoTest :: getSessionFactory() ::",e);
+			logger.log(Level.SEVERE,"ProxyDetailsDaoTest :: getSessionFactory() ::",e);
 		}
 	}
 
@@ -61,7 +62,7 @@ public class ProxyDetailsDaoTest {
 			assertTrue(!validProxyList.isEmpty());
 			assertTrue(validProxyList.size() == 101);
 		} catch (Exception e) {
-			ScraperLogger.log("ProxyDetailsDaoTest :: testUpdateProxyStatus() ::",e);
+			logger.log(Level.SEVERE,"ProxyDetailsDaoTest :: testUpdateProxyStatus() ::",e);
 		}
 	}
 
@@ -102,7 +103,7 @@ public class ProxyDetailsDaoTest {
 
 			proxyDao.updateProxyStatus(proxyPojoList);			
 		} catch (Exception e) {
-			ScraperLogger.log("ProxyDetailsDaoTest :: testUpdateProxyStatus() ::",e);
+			logger.log(Level.SEVERE,"ProxyDetailsDaoTest :: testUpdateProxyStatus() ::",e);
 		}
 	}
 }

@@ -1,17 +1,12 @@
 package com.ainosoft.seleniumplacescraper.util;
 
-import java.io.File;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /**
  * @author tushar@ainosoft.com
  */
 public class ScraperLogger {
 
-	private final static Logger logger = Logger.getLogger(ScraperLogger.class.getName());
+/*	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	private File loggerFile;
 	private static String loggerFileName;
@@ -45,16 +40,16 @@ public class ScraperLogger {
 		fileHandler.setFormatter(simpleFormatter);
 	}
 
-	/**
+	*//**
 	 * This method will print the message.
-	 */
+	 *//*
 	public static void log(String msg) {
 		logger.log(Level.INFO, msg);
 	}
 
-	/**
+	*//**
 	 * This method will print the exception.
-	 */
+	 *//*
 	public static void log(String str,Exception ex) {
 		logger.log(Level.SEVERE, str,ex);
 	}
@@ -65,5 +60,5 @@ public class ScraperLogger {
 
 	public static void setLoggerFileName(String loggerFileName) {
 		ScraperLogger.loggerFileName = loggerFileName;
-	}
+	}*/
 }

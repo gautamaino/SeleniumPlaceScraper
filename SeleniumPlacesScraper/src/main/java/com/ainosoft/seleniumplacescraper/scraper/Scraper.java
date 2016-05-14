@@ -2,8 +2,9 @@ package com.ainosoft.seleniumplacescraper.scraper;
 
 import java.util.ArrayList;
 
-import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
+import com.ainosoft.seleniumplacescraper.pojo.SpaceInformationPojo;
+
 
 /**
  * 
@@ -12,11 +13,11 @@ import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
  */
 public interface Scraper {
 
-	public ArrayList<PlacesDetailsPojo> startScrapingFetchList();
-
+	public void startScrapingFetchList();
+	
 	public ArrayList<ProxyDetailsPojo> startScrapingFetchProxyList();
 
-	public ArrayList<PlacesDetailsPojo> reRunScraping(int pageCount);
+	public void reRunScraping(SpaceInformationPojo spaceInfoPojo);
 
 	public void setUrl(String url);
 

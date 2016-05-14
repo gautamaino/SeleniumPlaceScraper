@@ -1,14 +1,13 @@
 package com.ainosoft.seleniumplacescraper.pojo;
-// default package
-// Generated 5 May, 2016 3:02:05 PM by Hibernate Tools 3.4.0.CR1
 
-import static javax.persistence.GenerationType.IDENTITY;
+// default package
+// Generated 11 May, 2016 11:28:14 AM by Hibernate Tools 3.4.0.CR1
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import static javax.persistence.GenerationType.IDENTITY;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -37,15 +36,20 @@ public class PlacesDetailsPojo implements java.io.Serializable {
 	private String timings;
 	private Date createdOn;
 	private Date modifiedOn;
+	private String spaceType;
 
 	public PlacesDetailsPojo() {
+	}
+
+	public PlacesDetailsPojo(Date createdOn) {
+		this.createdOn = createdOn;
 	}
 
 	public PlacesDetailsPojo(String placeName, String placeType, String placeCity,
 			String placeAddress, String placeWebsite, String placePhoneNo,
 			String longitude, String latitude, String placeUrl, String image,
 			String rating, String webElement, String timings, Date createdOn,
-			Date modifiedOn) {
+			Date modifiedOn, String spaceType) {
 		this.placeName = placeName;
 		this.placeType = placeType;
 		this.placeCity = placeCity;
@@ -61,6 +65,7 @@ public class PlacesDetailsPojo implements java.io.Serializable {
 		this.timings = timings;
 		this.createdOn = createdOn;
 		this.modifiedOn = modifiedOn;
+		this.spaceType = spaceType;
 	}
 
 	@Id
@@ -192,7 +197,7 @@ public class PlacesDetailsPojo implements java.io.Serializable {
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "created_on", length = 19)
+	@Column(name = "created_on", nullable = false, length = 19)
 	public Date getCreatedOn() {
 		return this.createdOn;
 	}
@@ -209,6 +214,15 @@ public class PlacesDetailsPojo implements java.io.Serializable {
 
 	public void setModifiedOn(Date modifiedOn) {
 		this.modifiedOn = modifiedOn;
+	}
+
+	@Column(name = "space_type", length = 100)
+	public String getSpaceType() {
+		return this.spaceType;
+	}
+
+	public void setSpaceType(String spaceType) {
+		this.spaceType = spaceType;
 	}
 
 }

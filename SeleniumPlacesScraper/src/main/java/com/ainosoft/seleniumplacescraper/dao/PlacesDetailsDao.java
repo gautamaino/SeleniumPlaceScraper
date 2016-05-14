@@ -3,6 +3,8 @@ package com.ainosoft.seleniumplacescraper.dao;
 
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -11,20 +13,19 @@ import org.hibernate.Transaction;
 
 import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
 import com.ainosoft.seleniumplacescraper.util.HibernateUtil;
-import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 
 /**
  * @author tushar@ainosoft.com
  */
 public class PlacesDetailsDao {
 
-	private ScraperLogger scraperLogger = new ScraperLogger("googlemaps");
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	protected SessionFactory getSessionFactory() {
 		try {
 			return HibernateUtil.getSessionFactory();
 		} catch (Exception e) {
-			scraperLogger.log("PlacesDetailsDao :: getSessionFactory() :: Exception :: ",e);
+			logger.log(Level.SEVERE,"PlacesDetailsDao :: getSessionFactory() :: Exception :: ",e);
 		}
 		return null;
 	}
@@ -45,7 +46,7 @@ public class PlacesDetailsDao {
 
 			return restaurantPojoList;
 		}catch(Exception e){
-			scraperLogger.log("PlacesDetailsDao :: getAllPlacesDetailsPojoList() :: Exception :: ",e);
+			logger.log(Level.SEVERE,"PlacesDetailsDao :: getAllPlacesDetailsPojoList() :: Exception :: ",e);
 			throw e;
 		}finally{
 			if(session != null){
@@ -83,7 +84,7 @@ public class PlacesDetailsDao {
 			transaction.commit();
 			return proxyPojo;
 		} catch (RuntimeException re) {
-			scraperLogger.log("PlacesDetailsDao :: savePlacesDetailsPojo() :: Exception :: ",re);
+			logger.log(Level.SEVERE,"PlacesDetailsDao :: savePlacesDetailsPojo() :: Exception :: ",re);
 			transaction.rollback();
 			throw re;
 		}finally{

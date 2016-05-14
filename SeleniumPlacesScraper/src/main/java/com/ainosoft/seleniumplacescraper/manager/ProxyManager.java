@@ -2,11 +2,12 @@ package com.ainosoft.seleniumplacescraper.manager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 import com.ainosoft.seleniumplacescraper.scraper.ProxyScraper;
-import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 
 /**
  * @author nalanda@ainosoft.com
@@ -16,7 +17,7 @@ import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 public class ProxyManager implements Manager {
 
 	@SuppressWarnings("unused")
-	private static ScraperLogger scraperLogger = new ScraperLogger("ProxyManager");
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	ProxyDetailsDao proxyDao = new ProxyDetailsDao();
 	ProxyScraper proxyScraper = new ProxyScraper();
@@ -37,7 +38,7 @@ public class ProxyManager implements Manager {
 				}
 			}
 		} catch (Exception e) {
-			ScraperLogger.log("ProxyManager :: initializeAndStart() ::",e); 
+			logger.log(Level.SEVERE,"ProxyManager :: initializeAndStart() ::",e); 
 		}
 	}
 
@@ -51,10 +52,11 @@ public class ProxyManager implements Manager {
 			proxyList = new ArrayList<ProxyDetailsPojo>();
 			List<ProxyDetailsPojo> validProxyList = proxyDao.getValidProxyList();
 			for(ProxyDetailsPojo proxyPojo : validProxyList){
+
 				proxyList.add(proxyPojo);
 			}
 		} catch (Exception e) {
-			ScraperLogger.log("ProxyManager :: getValidProxyList() ::",e); 
+			logger.log(Level.SEVERE,"ProxyManager :: getValidProxyList() ::",e); 
 		}
 		return proxyList;
 	}
@@ -67,7 +69,7 @@ public class ProxyManager implements Manager {
 		try {
 			proxyDao.updateProxyStatus(proxyPojoList);
 		} catch (Exception e) {
-			ScraperLogger.log("ProxyManager :: updateProxyStatus() ::",e); 
+			logger.log(Level.SEVERE,"ProxyManager :: updateProxyStatus() ::",e); 
 		}
 	}
 }

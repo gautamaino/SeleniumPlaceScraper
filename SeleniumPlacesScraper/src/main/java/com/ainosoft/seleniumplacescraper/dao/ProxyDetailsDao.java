@@ -5,6 +5,8 @@ package com.ainosoft.seleniumplacescraper.dao;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -13,7 +15,6 @@ import org.hibernate.Transaction;
 
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 import com.ainosoft.seleniumplacescraper.util.HibernateUtil;
-import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 
 /**
  * Home object for domain model class ProxyDetails.
@@ -23,7 +24,7 @@ import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 public class ProxyDetailsDao {
 
 	@SuppressWarnings("unused")
-	private static ScraperLogger scraperLogger = new ScraperLogger("ProxyDetailsDao");
+	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	private final SessionFactory sessionFactory = getSessionFactory();
 
@@ -35,7 +36,7 @@ public class ProxyDetailsDao {
 		try {
 			return HibernateUtil.getSessionFactory();
 		} catch (Exception e) {
-			ScraperLogger.log("ProxyManager :: getSessionFactory() ::",e); 
+			logger.log(Level.SEVERE,"ProxyManager :: getSessionFactory() ::",e); 
 		}
 		return sessionFactory;
 	}
@@ -67,7 +68,7 @@ public class ProxyDetailsDao {
 			transaction.commit();
 			return proxyPojo;
 		} catch (RuntimeException re) {
-			ScraperLogger.log("ProxyManager :: getSessionFactory() ::",re); 
+			logger.log(Level.SEVERE,"ProxyManager :: getSessionFactory() ::",re); 
 			transaction.rollback();
 			throw re;
 		}finally{
@@ -95,7 +96,7 @@ public class ProxyDetailsDao {
 			}			
 			transaction.commit();
 		} catch (RuntimeException re) {
-			ScraperLogger.log("ProxyManager :: updateProxyStatus() ::",re); 
+			logger.log(Level.SEVERE,"ProxyManager :: updateProxyStatus() ::",re); 
 			transaction.rollback();
 			throw re;
 		}finally{
@@ -116,12 +117,13 @@ public class ProxyDetailsDao {
 		try{
 			session = HibernateUtil.getSessionFactory().openSession();
 			Query query = session.createQuery("from ProxyDetailsPojo where status = 1");
-
+			query.setMaxResults(10);
+			
 			List<ProxyDetailsPojo> proxyDetailsPojoList = query.list();
 
 			return proxyDetailsPojoList;
 		}catch(Exception e){
-			ScraperLogger.log("ProxyManager :: updateProxyStatus() ::",e); 
+			logger.log(Level.SEVERE,"ProxyManager :: updateProxyStatus() ::",e); 
 			throw e;
 		}finally{
 			if(session != null){
@@ -149,7 +151,7 @@ public class ProxyDetailsDao {
 			}
 			transaction.commit();
 		} catch (Exception e) {
-			ScraperLogger.log("ProxyManager :: saveProxyListToDatabase() ::",e); 
+			logger.log(Level.SEVERE,"ProxyManager :: saveProxyListToDatabase() ::",e); 
 		}finally{
 			if(session != null){
 				session.flush();

@@ -1,14 +1,15 @@
 package com.ainosoft.seleniumplacescraper.scrapermanager;
 
-import static org.junit.Assert.assertTrue;
+import java.util.List;
 
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 
+import com.ainosoft.seleniumplacescraper.dao.SpaceInformationDao;
 import com.ainosoft.seleniumplacescraper.manager.ScraperManager;
-import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
+import com.ainosoft.seleniumplacescraper.pojo.SpaceInformationPojo;
 import com.ainosoft.seleniumplacescraper.scraper.GoogleMapScraper;
 
 /**
@@ -26,8 +27,11 @@ public class ScraperManagerTest {
 	@Test
 	public void testReRunScraping(){
 		GoogleMapScraper googleMapScraper = null;
+		SpaceInformationDao spaceInfoDao = null;
+		SpaceInformationPojo spaceInformation = null;
 		try {
 			googleMapScraper = new GoogleMapScraper();
+			spaceInfoDao = new SpaceInformationDao();
 
 			profile = new FirefoxProfile();
 			profile.setPreference("network.proxy.type", 1);
@@ -37,10 +41,18 @@ public class ScraperManagerTest {
 			fireFoxWebDriver = new FirefoxDriver(profile);
 			
 			googleMapScraper.setFireFoxWebDriver(fireFoxWebDriver);
-			googleMapScraper.setTextToSearch("restaurants in pune");
 			googleMapScraper.setUrl("https://www.google.co.in/maps");
 			
-			googleMapScraper.reRunScraping(8);
+			List<SpaceInformationPojo> spaceInfoList = spaceInfoDao.getAllSpaceInformationPojoList();
+			if(spaceInfoList!=null){
+				if(!spaceInfoList.isEmpty()){
+					for (SpaceInformationPojo spaceInformationPojo : spaceInfoList) {
+						spaceInformation = spaceInformationPojo;
+					}
+				}
+			}
+			
+			googleMapScraper.reRunScraping(spaceInformation);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -49,10 +61,10 @@ public class ScraperManagerTest {
 	@Test
 	public void testGetValidProxy(){
 		try {
-			ScraperManager scraperManager = new ScraperManager();
+			/*ScraperManager scraperManager = new ScraperManager();
 			ProxyDetailsPojo proxyDetailsPojo = scraperManager.getValidProxy();
 			
-			assertTrue(proxyDetailsPojo.getIpAddress().equals("94.25.15.190"));
+			assertTrue(proxyDetailsPojo.getIpAddress().equals("94.25.15.190"));*/
 		} catch (Exception e) {
 			// TODO: handle exception
 		}

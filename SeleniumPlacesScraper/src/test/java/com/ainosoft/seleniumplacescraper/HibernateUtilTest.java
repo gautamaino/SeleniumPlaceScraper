@@ -23,7 +23,6 @@ public class HibernateUtilTest {
 	/**
 	 * This method is use to check whether getSessionFactory() method is working properly or not
 	 */
-
 	@Test
 	public void testGetSessionFactory() {
 		try{

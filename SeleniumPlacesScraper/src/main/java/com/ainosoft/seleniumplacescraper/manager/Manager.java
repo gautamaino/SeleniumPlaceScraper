@@ -5,7 +5,7 @@ package com.ainosoft.seleniumplacescraper.manager;
  * This is Manager interface for scraping data 
  * It has only one method which id used to initialize and start scraping
  */
-public interface Manager {
+public interface Manager{
 
 	/**
 	 * This method starts the scraper by taking to parameters
