@@ -22,7 +22,6 @@ public class ProxyDetailsDaoTest {
 
 	ProxyDetailsDao proxyDao = new ProxyDetailsDao();
 
-	@SuppressWarnings("unused")
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	/**

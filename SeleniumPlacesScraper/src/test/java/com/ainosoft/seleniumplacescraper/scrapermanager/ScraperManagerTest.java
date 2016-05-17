@@ -8,7 +8,6 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 
 import com.ainosoft.seleniumplacescraper.dao.SpaceInformationDao;
-import com.ainosoft.seleniumplacescraper.manager.ScraperManager;
 import com.ainosoft.seleniumplacescraper.pojo.SpaceInformationPojo;
 import com.ainosoft.seleniumplacescraper.scraper.GoogleMapScraper;
 
@@ -19,16 +18,18 @@ import com.ainosoft.seleniumplacescraper.scraper.GoogleMapScraper;
  */
 public class ScraperManagerTest {
 	
-	private WebDriver fireFoxWebDriver = null;	
 	private String SERVER_IP = "91.121.194.6";
 	private int PORT = 3128;
-	private FirefoxProfile profile = null;
+	//private FirefoxProfile profile = null;
 	
 	@Test
 	public void testReRunScraping(){
 		GoogleMapScraper googleMapScraper = null;
 		SpaceInformationDao spaceInfoDao = null;
 		SpaceInformationPojo spaceInformation = null;
+		
+		WebDriver fireFoxWebDriver = null;	
+		FirefoxProfile profile = null;
 		try {
 			googleMapScraper = new GoogleMapScraper();
 			spaceInfoDao = new SpaceInformationDao();
@@ -37,9 +38,8 @@ public class ScraperManagerTest {
 			profile.setPreference("network.proxy.type", 1);
 			profile.setPreference("network.proxy.http", SERVER_IP);
 			profile.setPreference("network.proxy.http_port", PORT);
-
-			fireFoxWebDriver = new FirefoxDriver(profile);
 			
+			fireFoxWebDriver = new FirefoxDriver(profile);
 			googleMapScraper.setFireFoxWebDriver(fireFoxWebDriver);
 			googleMapScraper.setUrl("https://www.google.co.in/maps");
 			
@@ -51,8 +51,8 @@ public class ScraperManagerTest {
 					}
 				}
 			}
-			
-			googleMapScraper.reRunScraping(spaceInformation);
+			googleMapScraper.setSpaceInfoPojo(spaceInformation);
+			googleMapScraper.reRunScraping();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

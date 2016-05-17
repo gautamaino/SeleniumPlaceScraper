@@ -1,5 +1,6 @@
 package com.ainosoft.seleniumplacescraper.util;
 
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +23,8 @@ public class HibernateUtil {
 
 	static {
 		try {
-			config = new Configuration().configure("/hibernate.cfg.xml");
+			
+			config = new Configuration().configure(new File("/home/comp4/git/SeleniumPlaceScraper/SeleniumPlacesScraper/src/main/java/com/ainosoft/seleniumplacescraper/util/hibernate.cfg.xml"));
 			
 		} catch (final Throwable th) {
 			logger.log(Level.SEVERE, "from HibernateUtil static block", th);

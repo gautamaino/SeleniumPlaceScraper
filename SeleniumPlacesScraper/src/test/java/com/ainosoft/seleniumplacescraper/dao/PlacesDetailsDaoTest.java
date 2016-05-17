@@ -23,8 +23,10 @@ public class PlacesDetailsDaoTest {
 		try {
 			PlacesDetailsDao placesDetailsDao = new PlacesDetailsDao();
 			
+			@SuppressWarnings("unused")
 			byte[] bytes = { (byte) 204, 29, (byte) 207, (byte) 217 };
 
+			@SuppressWarnings("unused")
 			byte[] bytes1 = { (byte) 204, 29, (byte) 207, (byte) 217 };
 
 			PlacesDetailsPojo placesDetailsPojo = new PlacesDetailsPojo();
@@ -37,6 +39,7 @@ public class PlacesDetailsDaoTest {
 			placesDetailsPojo.setPlacePhoneNo("555");
 			placesDetailsPojo.setPlaceType("lmn");
 			
+			@SuppressWarnings("unused")
 			PlacesDetailsPojo savedRestaurantDetailData = placesDetailsDao.savePlacesDetailsPojo(placesDetailsPojo);
 			
 		} catch (Exception e) {

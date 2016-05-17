@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
-import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 
 /**
  * @author nalanda
@@ -19,7 +18,6 @@ public class DataEntryMaker implements Runnable {
 
 	ArrayList<ProxyDetailsPojo> proxyPojoList;
 
-	@SuppressWarnings("unused")
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	public DataEntryMaker(ArrayList<ProxyDetailsPojo> proxyPojoList) {

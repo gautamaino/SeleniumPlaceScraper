@@ -42,6 +42,7 @@ public class PlacesDetailsDao {
 			session = HibernateUtil.getSessionFactory().openSession();
 			Query query = session.createQuery("from PlacesDetailsPojo");
 
+			@SuppressWarnings("unchecked")
 			List<PlacesDetailsPojo> restaurantPojoList = query.list();
 
 			return restaurantPojoList;

@@ -44,7 +44,8 @@ public class SpaceInformationDao {
 			session = HibernateUtil.getSessionFactory().openSession();
 			Query query = session.createQuery("from SpaceInformationPojo");
 
-			List<SpaceInformationPojo> restaurantPojoList = query.list();
+			@SuppressWarnings("unchecked")
+			List<SpaceInformationPojo> restaurantPojoList =  query.list();
 
 			return restaurantPojoList;
 		}catch(Exception e){

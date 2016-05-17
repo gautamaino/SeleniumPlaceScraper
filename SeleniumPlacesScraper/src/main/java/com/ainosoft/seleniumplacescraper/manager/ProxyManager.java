@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 import com.ainosoft.seleniumplacescraper.scraper.ProxyScraper;
+import com.ainosoft.seleniumplacescraper.util.ProxyHolder;
 
 /**
  * @author nalanda@ainosoft.com
@@ -16,7 +17,6 @@ import com.ainosoft.seleniumplacescraper.scraper.ProxyScraper;
  */
 public class ProxyManager implements Manager {
 
-	@SuppressWarnings("unused")
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	ProxyDetailsDao proxyDao = new ProxyDetailsDao();
@@ -26,7 +26,7 @@ public class ProxyManager implements Manager {
 	 * This method accepts two parameters the site to scrape data from and the data to be scraped
 	 */
 	@Override
-	public void initializeAndStart(String url, String textToSearch, String city) {
+	public void initializeAndStart(String url, String textToSearch, String city,ProxyHolder proxyHolder) {
 		try {
 			proxyScraper.setUrl(url);
 

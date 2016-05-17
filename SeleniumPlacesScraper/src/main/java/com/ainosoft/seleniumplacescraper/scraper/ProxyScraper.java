@@ -22,7 +22,6 @@ import com.ainosoft.seleniumplacescraper.pojo.SpaceInformationPojo;
  */
 public class ProxyScraper implements Scraper{
 
-	@SuppressWarnings("unused")
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	private String url;
@@ -174,10 +173,7 @@ public class ProxyScraper implements Scraper{
 	}
 
 	@Override
-	public void reRunScraping(SpaceInformationPojo spaceInfoPojo) {
+	public void reRunScraping() {
 	}
 
-	@Override
-	public void setTextToSearch(String textToScrape) {
-	}
 }

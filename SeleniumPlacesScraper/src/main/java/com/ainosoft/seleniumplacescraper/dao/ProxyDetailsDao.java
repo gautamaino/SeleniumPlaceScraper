@@ -23,7 +23,6 @@ import com.ainosoft.seleniumplacescraper.util.HibernateUtil;
  */
 public class ProxyDetailsDao {
 
-	@SuppressWarnings("unused")
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 
 	private final SessionFactory sessionFactory = getSessionFactory();
@@ -119,6 +118,7 @@ public class ProxyDetailsDao {
 			Query query = session.createQuery("from ProxyDetailsPojo where status = 1");
 			query.setMaxResults(10);
 			
+			@SuppressWarnings("unchecked")
 			List<ProxyDetailsPojo> proxyDetailsPojoList = query.list();
 
 			return proxyDetailsPojoList;

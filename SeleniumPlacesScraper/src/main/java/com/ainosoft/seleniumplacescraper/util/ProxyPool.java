@@ -1,13 +1,17 @@
 package com.ainosoft.seleniumplacescraper.util;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.ainosoft.seleniumplacescraper.manager.ProxyManager;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxProfile;
+
+import com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 
 /**
@@ -18,77 +22,109 @@ import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 public class ProxyPool implements Runnable{
 
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-
-	private Set<ProxyDetailsPojo> validProxySet = new HashSet<ProxyDetailsPojo>();
-	private ArrayList<ProxyDetailsPojo> validProxyList = new ArrayList<ProxyDetailsPojo>();
-	private ArrayList<ProxyDetailsPojo> inValidProxyList = new ArrayList<ProxyDetailsPojo>();
+	
+	private ConcurrentHashMap<String,ProxyDetailsPojo> validProxySet = new ConcurrentHashMap<String,ProxyDetailsPojo>();
+	private ConcurrentHashMap<String,ProxyDetailsPojo> inValidProxySet = new ConcurrentHashMap<String,ProxyDetailsPojo>();
+	
+	
+	public ProxyPool(ArrayList<ProxyDetailsPojo> validProxyList){
+		for (ProxyDetailsPojo proxyDetailsPojo : validProxyList) {
+			validProxySet.put(proxyDetailsPojo.getIpAddress(), proxyDetailsPojo);
+		} 
+	}
 	
 	@Override
 	public void run() {
+		ProxyDetailsDao proxyDetailsDao = null;
 		try {
-			logger.log(Level.INFO,"----------------------Validating Proxies-----------------");
 			
-			ProxyManager proxyManager = new ProxyManager();
-			
-			ArrayList<ProxyDetailsPojo> proxyDetailsPojoList = proxyManager.getValidProxyList();
-			if(proxyDetailsPojoList!=null){
-				if(!proxyDetailsPojoList.isEmpty()){
-					for (ProxyDetailsPojo proxyDetailsPojo : proxyDetailsPojoList) {
-						if(proxyDetailsPojo.getIpAddress()!=null){
-							boolean result = checkForValidIp(proxyDetailsPojo.getIpAddress());
-							if(result){
-								validProxySet.add(proxyDetailsPojo);
-								validProxyList.addAll(validProxySet);
-							}else{
-								inValidProxyList.add(proxyDetailsPojo);
-								proxyManager.updateProxyStatus(inValidProxyList);
-							}
+			logger.log(Level.INFO,"Proxy Pool is updating proxies...");
+
+			proxyDetailsDao = new ProxyDetailsDao();
+
+			if(validProxySet!=null){
+				if(!validProxySet.isEmpty()){
+					
+					for (ProxyDetailsPojo proxyDetailsPojo : validProxySet.values()) {
+						
+						String ipAddress = proxyDetailsPojo.getIpAddress();
+						int port = Integer.parseInt(proxyDetailsPojo.getIpPort());
+						
+						boolean result = checkForValidIp(ipAddress,port);
+					
+						if(result){
+							validProxySet.put(proxyDetailsPojo.getIpAddress(),proxyDetailsPojo);
+						}else{
+							inValidProxySet.put(proxyDetailsPojo.getIpAddress(),proxyDetailsPojo);
 						}
-					}					
+						
+						Thread.sleep(8000);
+					}							
 				}
 			}
-		logger.log(Level.INFO,"---------------------Proxy Validation Completed For "+validProxyList.size()+" Values"+"--------------");
+			
+			if(inValidProxySet!=null){
+				if(!inValidProxySet.isEmpty()){
+					ArrayList<ProxyDetailsPojo> inValidProxyList = new ArrayList<ProxyDetailsPojo>();
+					for (ProxyDetailsPojo proxyDetailsPojo : inValidProxySet.values()) {
+						inValidProxyList.add(proxyDetailsPojo);
+					}
+					proxyDetailsDao.updateProxyStatus(inValidProxyList);		
+				}
+			}
+			
+			logger.log(Level.INFO," "+inValidProxySet.size()+" proxies are updated...");
+			
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"ProxyPool :: checkForValidIp() ::",e);
+			logger.log(Level.SEVERE,"ProxyPool :: run() ::",e);
+		}finally{
+			Thread.currentThread().interrupt();
 		}
 	}
+	
+	
 	
 	/**
-	 * This method is used for validating a proxy
-	 * @param ipAddress
-	 * @return boolean
+	 * This method is use to get new instance of WebDriver, along with new profile creation.
+	 * @return WebDriver
 	 */
-	public boolean checkForValidIp(String ipAddress) {
-		boolean connectionStatus = false;
+	public boolean checkForValidIp(String ipAddress,int port){
+		WebDriver fireFoxWebDriver = null;	
+		FirefoxProfile profile = null;
+		boolean result = false;
 		try {
-			//here type proxy server ip
-			InetAddress addr = InetAddress.getByName(ipAddress);
+			profile = new FirefoxProfile();
+			profile.setPreference("network.proxy.type", 1);
+			profile.setPreference("network.proxy.http", ipAddress);
+			profile.setPreference("network.proxy.http_port", port);
 
-			// 1 second time for response
-			connectionStatus = addr.isReachable(1000); 
+			fireFoxWebDriver = new FirefoxDriver(profile);
+			
+			//fireFoxWebDriver.get("http://whatismyipaddress.com/");
+			//Thread.sleep(8000);
+
+			// Launch website
+			fireFoxWebDriver.navigate().to("https://www.google.co.in/");
+			Thread.sleep(3000);
+			
+			try {
+				String googleName = fireFoxWebDriver.findElement(By.xpath(".//*[@class='logo-subtext']")).getText();
+				if(googleName.equals("India")){
+					result = true;
+				}else{
+					result = false;
+				}
+			} catch (NoSuchElementException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"ProxyPool :: checkForValidIp() ::",e);
+			logger.log(Level.SEVERE,"ScraperManager :: getFireFoxDriver() :: Exception :: ",e);
+		}finally{
+			fireFoxWebDriver.close();
 		}
-		return connectionStatus;
+		return result;
 	}
 
-	
-	public ArrayList<ProxyDetailsPojo> getValidProxyList() {
-		return validProxyList;
-	}
-
-	public void setValidProxyList(ArrayList<ProxyDetailsPojo> validProxyList) {
-		this.validProxyList = validProxyList;
-	}
-
-	public ArrayList<ProxyDetailsPojo> getInValidProxyList() {
-		return inValidProxyList;
-	}
-
-	public void setInValidProxyList(ArrayList<ProxyDetailsPojo> inValidProxyList) {
-		this.inValidProxyList = inValidProxyList;
-	}
-	
-	
-	
 }

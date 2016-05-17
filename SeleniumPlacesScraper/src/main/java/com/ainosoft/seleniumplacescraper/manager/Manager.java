@@ -1,5 +1,7 @@
 package com.ainosoft.seleniumplacescraper.manager;
 
+import com.ainosoft.seleniumplacescraper.util.ProxyHolder;
+
 /**
  * @author nalanda@ainosoft.com
  * This is Manager interface for scraping data 
@@ -13,5 +15,5 @@ public interface Manager{
 	 * @param textToSearch: Text related to a particular topic for searching on the site provided 
 	 *                      via URL
 	 */
-	public void initializeAndStart(String url,String textToSearch,String city);
+	public void initializeAndStart(String url,String textToSearch,String city,ProxyHolder proxyHolder);
 }

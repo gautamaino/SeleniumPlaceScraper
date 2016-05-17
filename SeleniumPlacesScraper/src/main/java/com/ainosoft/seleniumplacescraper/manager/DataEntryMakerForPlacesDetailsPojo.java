@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 import com.ainosoft.seleniumplacescraper.dao.PlacesDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
-import com.ainosoft.seleniumplacescraper.util.ScraperLogger;
 
 /**
  * 
