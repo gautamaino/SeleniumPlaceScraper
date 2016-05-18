@@ -11,7 +11,7 @@ import com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 
 /**
- * 
+ * This class is just used to retrieve proxies from database, hold them and start the proxypool thread periodically in background.
  * @author tushar@ainosoft.com
  *
  */
@@ -33,7 +33,7 @@ public class ProxyHolder {
 			allProxyList = (ArrayList<ProxyDetailsPojo>) proxyDetailsDao.getValidProxyList();
 			
 			ScheduledExecutorService threadSchedulerService = Executors.newScheduledThreadPool(1);
-			threadSchedulerService.scheduleAtFixedRate(new ProxyPool(allProxyList), 0, 10, TimeUnit.MINUTES);
+			threadSchedulerService.scheduleAtFixedRate(new ProxyPool(allProxyList), 0, 15, TimeUnit.MINUTES);
 			
 			Thread.sleep(8000);
 

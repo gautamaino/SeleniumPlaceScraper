@@ -116,7 +116,7 @@ public class ProxyDetailsDao {
 		try{
 			session = HibernateUtil.getSessionFactory().openSession();
 			Query query = session.createQuery("from ProxyDetailsPojo where status = 1");
-			query.setMaxResults(10);
+			query.setMaxResults(100);
 			
 			@SuppressWarnings("unchecked")
 			List<ProxyDetailsPojo> proxyDetailsPojoList = query.list();

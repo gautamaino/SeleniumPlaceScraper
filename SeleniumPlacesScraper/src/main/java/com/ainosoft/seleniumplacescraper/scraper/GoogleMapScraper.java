@@ -32,8 +32,100 @@ public class GoogleMapScraper implements Scraper {
 	private WebDriver fireFoxWebDriver = null;
 	private SpaceInformationPojo spaceInfoPojo;
 	private String url;
-	private ProxyHolder proxyHolder;
 
+
+
+	/**
+	 * This method is use to re-run the scraper when exceptions occurres. 
+	 * Which takes parameter as pagecount and depending on the pagecount
+	 * that page gets opened and scraping gets started.
+	 */
+	@Override
+	public void reRunScraping() {
+		SpaceInformationDao spaceInfoDao = null;
+		int pCount = 0;
+		try {
+			spaceInfoDao = new SpaceInformationDao();
+
+			ProxyHolder proxyHolder = new ProxyHolder();
+			proxyHolder.updateProxies();
+			
+			fireFoxWebDriver = getFireFoxDriver(proxyHolder);
+
+			fireFoxWebDriver.get("http://whatismyipaddress.com/");
+			Thread.sleep(8000);
+
+			// Launch website
+			fireFoxWebDriver.navigate().to(url);
+			Thread.sleep(8000);
+
+			// Maximize the browser
+			//fireFoxWebDriver.manage().window().maximize();
+
+			// Enter value 50 in the second number of the percent Calculator
+			try {
+				WebElement searchTextBox = fireFoxWebDriver.findElement(By.xpath(".//*[@id='searchboxinput']"));
+				searchTextBox.sendKeys(spaceInfoPojo.getSpaceType()+" "+"in"+" "+spaceInfoPojo.getSpaceCity());
+
+				Thread.sleep(9000);
+			} catch (NoSuchElementException e) {
+
+			}
+
+			try {
+				// Click search Button
+				WebElement searchButton = fireFoxWebDriver.findElement(By.xpath(".//*[@id='searchbox']/div[1]/button"));
+				searchButton.click();
+
+				Thread.sleep(9000);
+			} catch (NoSuchElementException e) {
+
+			}
+
+			while(!(pCount == spaceInfoPojo.getPageCount())){
+				try {
+					pCount++;
+					Thread.sleep(9000);
+
+					WebElement nextButton = fireFoxWebDriver.findElement(By.xpath(".//*[@id='widget-pane-section-pagination-button-next']"));
+					nextButton.click();
+
+					Thread.sleep(9000);
+
+				} catch (NoSuchElementException e) {
+					pCount--;
+					spaceInfoPojo.setPageCount(pCount);
+					spaceInfoDao.updatePageCount(spaceInfoPojo);
+					continue;
+				}
+			}
+
+			startScrapingFetchList();
+
+			Thread.sleep(12000);
+
+			try {
+				WebElement nextButton = fireFoxWebDriver.findElement(By.xpath(".//*[@id='widget-pane-section-pagination-button-next']"));
+				nextButton.click();
+				Thread.sleep(9000);
+				pCount++;
+			} catch (NoSuchElementException e) {
+				spaceInfoPojo.setPageCount(pCount);
+				spaceInfoDao.updatePageCount(spaceInfoPojo);
+			}
+
+			spaceInfoPojo.setPageCount(pCount);
+			spaceInfoDao.updatePageCount(spaceInfoPojo);
+
+			Thread.sleep(9000);
+
+			fireFoxWebDriver.close();
+		} catch (Exception e) {
+			logger.log(Level.SEVERE,"GoogleMapScraper :: reRunScraping() :: Exception :: ",e);
+		}
+	}
+
+	
 	/**
 	 * This is overridden method, which starts scraping and stores data into database. 
 	 * This method will get called in fresh mode for first time.
@@ -50,16 +142,16 @@ public class GoogleMapScraper implements Scraper {
 			for (int i = 0 ; i < size ; ++i) {
 				PlacesDetailsPojo placesDetailsPojo ;
 
-				Thread.sleep(8000);
+				Thread.sleep(9000);
 				List<WebElement> elementList = fireFoxWebDriver.findElements(By.xpath(".//*[@class='widget-pane-section-result']"));
-				Thread.sleep(8000);
+				Thread.sleep(12000);
 
 				if(elementList!=null){
 					if(!elementList.isEmpty()){
 
-						Thread.sleep(8000);
+						Thread.sleep(9000);
 						elementList.get(i).click();
-						Thread.sleep(8000);
+						Thread.sleep(9000);
 
 						size = elementList.size();
 
@@ -67,12 +159,12 @@ public class GoogleMapScraper implements Scraper {
 
 						placesDetailsPojoList.add(placesDetailsPojo);
 
-						Thread.sleep(8000);
+						Thread.sleep(9000);
 
 						try {
 							//returning back to the first page
 							fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/button")).click();
-							Thread.sleep(8000);
+							Thread.sleep(9000);
 						} catch (NoSuchElementException e) {
 							break;
 						} 
@@ -88,102 +180,104 @@ public class GoogleMapScraper implements Scraper {
 			dataEntryMakerForPlacesDetailsPojo = new Thread(new DataEntryMakerForPlacesDetailsPojo(placesDetailsPojoList));
 			dataEntryMakerForPlacesDetailsPojo.start();
 
-			Thread.sleep(8000);
+			Thread.sleep(9000);
 
 		} catch (Exception e) {
 
 			logger.log(Level.SEVERE,"GoogleMapScraper :: startScrapingFetchList() :: Exception :: ",e);
 		}
 	}
+	
+	
+	
+	
+	/**
+	 * This method is use to get new instance of WebDriver, along with new profile creation.
+	 * @return WebDriver
+	 */
+	public WebDriver getFireFoxDriver(ProxyHolder proxyHolder){
+		WebDriver fireFoxWebDriver = null;	
+		FirefoxProfile profile = null;
+		ProxyDetailsPojo proxyDetailsPojo;
+		try {
+			int proxyCount = spaceInfoPojo.getPageCount();
+			while(true){
+
+				if(proxyCount==proxyHolder.getAllProxyList().size()){
+					proxyDetailsPojo = proxyHolder.getNewProxy(proxyCount--);	
+				}else if(proxyCount<proxyHolder.getAllProxyList().size()){
+					proxyDetailsPojo = proxyHolder.getNewProxy(proxyCount);	
+				}else{
+					proxyDetailsPojo = proxyHolder.getNewProxy(0);
+				}
+
+				String serverIP = proxyDetailsPojo.getIpAddress();
+				Integer port = Integer.parseInt(proxyDetailsPojo.getIpPort());
+
+				boolean result = checkForValidIp(serverIP,port);
+				if(result){
+					profile = new FirefoxProfile();
+					profile.setPreference("network.proxy.type", 1);
+					profile.setPreference("network.proxy.http", serverIP);
+					profile.setPreference("network.proxy.http_port", port);
+
+					fireFoxWebDriver = new FirefoxDriver(profile);
+					break;
+				}else{
+					proxyCount++;
+					getFireFoxDriver(proxyHolder);
+				}
+			}
+		} catch (Exception e) {
+			logger.log(Level.SEVERE,"ScraperManager :: getFireFoxDriver() :: Exception :: ",e);
+		}
+		return fireFoxWebDriver;
+	}
 
 
 	/**
-	 * This method is use to re-run the scraper when exceptions occurres. 
-	 * Which takes parameter as pagecount and depending on the pagecount
-	 * that page gets opened and scraping gets started.
+	 * This method is use to get new instance of WebDriver, along with new profile creation.
+	 * @return WebDriver
 	 */
-	@Override
-	public void reRunScraping() {
-		SpaceInformationDao spaceInfoDao = null;
-		int pCount = 0;
+	public boolean checkForValidIp(String ipAddress,int port){
+		WebDriver fireFoxWebDriver = null;	
+		FirefoxProfile profile = null;
+		boolean result = false;
 		try {
-			spaceInfoDao = new SpaceInformationDao();
+			profile = new FirefoxProfile();
+			profile.setPreference("network.proxy.type", 1);
+			profile.setPreference("network.proxy.http", ipAddress);
+			profile.setPreference("network.proxy.http_port", port);
 
-			fireFoxWebDriver = getFireFoxDriver();
+			fireFoxWebDriver = new FirefoxDriver(profile);
 
-			fireFoxWebDriver.get("http://whatismyipaddress.com/");
-			Thread.sleep(18000);
-
+			Thread.sleep(9000);
+			
 			// Launch website
-			fireFoxWebDriver.navigate().to(url);
-			Thread.sleep(8000);
-
-			// Maximize the browser
-			//fireFoxWebDriver.manage().window().maximize();
-
-			// Enter value 50 in the second number of the percent Calculator
-			try {
-				WebElement searchTextBox = fireFoxWebDriver.findElement(By.xpath(".//*[@id='searchboxinput']"));
-				searchTextBox.sendKeys(spaceInfoPojo.getSpaceType()+" "+"in"+" "+spaceInfoPojo.getSpaceCity());
-
-				Thread.sleep(8000);
-			} catch (NoSuchElementException e) {
-
-			}
+			fireFoxWebDriver.navigate().to("https://www.google.co.in/");
+			Thread.sleep(9000);
 
 			try {
-				// Click search Button
-				WebElement searchButton = fireFoxWebDriver.findElement(By.xpath(".//*[@id='searchbox']/div[1]/button"));
-				searchButton.click();
+				String googleName = fireFoxWebDriver.findElement(By.xpath(".//*[@class='logo-subtext']")).getText();
+				Thread.sleep(9000);
 
-				Thread.sleep(8000);
-			} catch (NoSuchElementException e) {
-
-			}
-
-			while(!(pCount == spaceInfoPojo.getPageCount())){
-				try {
-					pCount++;
-					Thread.sleep(8000);
-
-					WebElement nextButton = fireFoxWebDriver.findElement(By.xpath(".//*[@id='widget-pane-section-pagination-button-next']"));
-					nextButton.click();
-
-					Thread.sleep(8000);
-
-				} catch (NoSuchElementException e) {
-					pCount--;
-					spaceInfoPojo.setPageCount(pCount);
-					spaceInfoDao.updatePageCount(spaceInfoPojo);
-					continue;
+				if(googleName.equals("India")){
+					result = true;
+				}else{
+					result = false;
 				}
-			}
-
-			startScrapingFetchList();
-
-			Thread.sleep(8000);
-
-			try {
-				WebElement nextButton = fireFoxWebDriver.findElement(By.xpath(".//*[@id='widget-pane-section-pagination-button-next']"));
-				nextButton.click();
-				Thread.sleep(8000);
-				pCount++;
 			} catch (NoSuchElementException e) {
-				spaceInfoPojo.setPageCount(pCount);
-				spaceInfoDao.updatePageCount(spaceInfoPojo);
+				logger.log(Level.SEVERE,"ScraperManager :: checkForValidIp() :: Google name not found... ",e);
 			}
 
-			spaceInfoPojo.setPageCount(pCount);
-			spaceInfoDao.updatePageCount(spaceInfoPojo);
-
-			Thread.sleep(8000);
-
-			fireFoxWebDriver.close();
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"GoogleMapScraper :: reRunScraping() :: Exception :: ",e);
+			logger.log(Level.SEVERE,"ScraperManager :: getFireFoxDriver() :: Exception :: ",e);
+		}finally{
+			fireFoxWebDriver.close();
 		}
+		return result;
 	}
-
+	
 
 	/**
 	 * This method fetches data and creates new PlacesDetailsPojo and returns it to startScraping().
@@ -199,7 +293,7 @@ public class GoogleMapScraper implements Scraper {
 			try {
 				name = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[1]/div[2]/div[1]/h1")).getText();
 				//logger.log(Level.INFO,"Type : "+name);
-				//Thread.sleep(3000);
+				Thread.sleep(5000);
 			} catch (NoSuchElementException e) {
 
 			}
@@ -255,7 +349,7 @@ public class GoogleMapScraper implements Scraper {
 			try {
 				timing = fireFoxWebDriver.findElement(By.className("widget-pane-section-info-hour-text")).getText();
 				//logger.log(Level.INFO,"Timing : "+timing);
-				//Thread.sleep(3000);
+				Thread.sleep(3000);
 			} catch (NoSuchElementException e) {
 
 			}
@@ -273,11 +367,12 @@ public class GoogleMapScraper implements Scraper {
 			try {
 				WebElement divWeb = fireFoxWebDriver.findElement(By.xpath(".//*[@class='widget-pane widget-pane-visible']"));
 				diveWholeWeb = divWeb.getAttribute("innerHTML");
+				Thread.sleep(3000);
 			} catch (NoSuchElementException e) {
 
 			}
 
-			Thread.sleep(8000);
+			Thread.sleep(9000);
 
 			String url = fireFoxWebDriver.getCurrentUrl();
 
@@ -336,97 +431,12 @@ public class GoogleMapScraper implements Scraper {
 			placesDetailsPojo.setWebElement(diveWholeWeb);
 			placesDetailsPojo.setImage(imageURL);
 
+			Thread.sleep(9000);
+
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,"GoogleMapScraper :: getPlacesDetailsPojo() :: Exception :: ",e);
 		}
 		return placesDetailsPojo;
-	}
-
-	/**
-	 * This method is use to get new instance of WebDriver, along with new profile creation.
-	 * @return WebDriver
-	 */
-	public WebDriver getFireFoxDriver(){
-		WebDriver fireFoxWebDriver = null;	
-		FirefoxProfile profile = null;
-		ProxyDetailsPojo proxyDetailsPojo;
-		try {
-			int proxyCount = spaceInfoPojo.getPageCount();
-			while(true){
-
-				if(proxyCount==proxyHolder.getAllProxyList().size()){
-					proxyDetailsPojo = proxyHolder.getNewProxy(proxyCount--);	
-				}else if(proxyCount<proxyHolder.getAllProxyList().size()){
-					proxyDetailsPojo = proxyHolder.getNewProxy(proxyCount);	
-				}else{
-					proxyDetailsPojo = proxyHolder.getNewProxy(0);
-				}
-
-				String serverIP = proxyDetailsPojo.getIpAddress();
-				Integer port = Integer.parseInt(proxyDetailsPojo.getIpPort());
-
-				boolean result = checkForValidIp(serverIP,port);
-				if(result){
-					profile = new FirefoxProfile();
-					profile.setPreference("network.proxy.type", 1);
-					profile.setPreference("network.proxy.http", serverIP);
-					profile.setPreference("network.proxy.http_port", port);
-
-					fireFoxWebDriver = new FirefoxDriver(profile);
-					break;
-				}else{
-					proxyCount++;
-					getFireFoxDriver();
-				}
-			}
-		} catch (Exception e) {
-			logger.log(Level.SEVERE,"ScraperManager :: getFireFoxDriver() :: Exception :: ",e);
-		}
-		return fireFoxWebDriver;
-	}
-
-
-	/**
-	 * This method is use to get new instance of WebDriver, along with new profile creation.
-	 * @return WebDriver
-	 */
-	public boolean checkForValidIp(String ipAddress,int port){
-		WebDriver fireFoxWebDriver = null;	
-		FirefoxProfile profile = null;
-		boolean result = false;
-		try {
-			profile = new FirefoxProfile();
-			profile.setPreference("network.proxy.type", 1);
-			profile.setPreference("network.proxy.http", ipAddress);
-			profile.setPreference("network.proxy.http_port", port);
-
-			fireFoxWebDriver = new FirefoxDriver(profile);
-
-			//fireFoxWebDriver.get("http://whatismyipaddress.com/");
-			//Thread.sleep(8000);
-
-			// Launch website
-			fireFoxWebDriver.navigate().to("https://www.google.co.in/");
-			Thread.sleep(3000);
-
-			try {
-				String googleName = fireFoxWebDriver.findElement(By.xpath(".//*[@class='logo-subtext']")).getText();
-				if(googleName.equals("India")){
-					result = true;
-				}else{
-					result = false;
-				}
-			} catch (NoSuchElementException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		} catch (Exception e) {
-			logger.log(Level.SEVERE,"ScraperManager :: getFireFoxDriver() :: Exception :: ",e);
-		}finally{
-			fireFoxWebDriver.close();
-		}
-		return result;
 	}
 
 
@@ -447,10 +457,6 @@ public class GoogleMapScraper implements Scraper {
 
 	public void setFireFoxWebDriver(WebDriver fireFoxWebDriver) {
 		this.fireFoxWebDriver = fireFoxWebDriver;
-	}
-
-	public void setProxyHolder(ProxyHolder proxyHolder) {
-		this.proxyHolder = proxyHolder;
 	}
 
 }

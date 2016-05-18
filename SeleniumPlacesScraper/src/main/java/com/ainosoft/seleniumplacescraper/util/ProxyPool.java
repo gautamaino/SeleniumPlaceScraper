@@ -15,7 +15,8 @@ import com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 
 /**
- * 
+ * This is a thread that will run periodically in the background and will check whether that particular proxy is working or not.
+ * And accordingly will update the database.
  * @author tushar@ainosoft.com
  *
  */
@@ -100,12 +101,9 @@ public class ProxyPool implements Runnable{
 
 			fireFoxWebDriver = new FirefoxDriver(profile);
 			
-			//fireFoxWebDriver.get("http://whatismyipaddress.com/");
-			//Thread.sleep(8000);
-
 			// Launch website
 			fireFoxWebDriver.navigate().to("https://www.google.co.in/");
-			Thread.sleep(3000);
+			Thread.sleep(8000);
 			
 			try {
 				String googleName = fireFoxWebDriver.findElement(By.xpath(".//*[@class='logo-subtext']")).getText();
@@ -115,12 +113,11 @@ public class ProxyPool implements Runnable{
 					result = false;
 				}
 			} catch (NoSuchElementException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.log(Level.SEVERE,"ProxyPool :: checkForValidIp() :: Google name not found... ",e);
 			}
 			
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"ScraperManager :: getFireFoxDriver() :: Exception :: ",e);
+			logger.log(Level.SEVERE,"ProxyPool :: checkForValidIp() :: Exception :: ",e);
 		}finally{
 			fireFoxWebDriver.close();
 		}

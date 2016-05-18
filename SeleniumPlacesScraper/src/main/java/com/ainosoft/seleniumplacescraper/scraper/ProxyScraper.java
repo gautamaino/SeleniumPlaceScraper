@@ -14,7 +14,6 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 
 import com.ainosoft.seleniumplacescraper.dao.ProxyDetailsDao;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
-import com.ainosoft.seleniumplacescraper.pojo.SpaceInformationPojo;
 
 
 /**
