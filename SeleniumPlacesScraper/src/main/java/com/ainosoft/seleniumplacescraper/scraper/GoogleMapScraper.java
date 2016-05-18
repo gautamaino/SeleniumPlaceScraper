@@ -49,7 +49,7 @@ public class GoogleMapScraper implements Scraper {
 
 			ProxyHolder proxyHolder = new ProxyHolder();
 			proxyHolder.updateProxies();
-			
+
 			fireFoxWebDriver = getFireFoxDriver(proxyHolder);
 
 			fireFoxWebDriver.get("http://whatismyipaddress.com/");
@@ -125,7 +125,7 @@ public class GoogleMapScraper implements Scraper {
 		}
 	}
 
-	
+
 	/**
 	 * This is overridden method, which starts scraping and stores data into database. 
 	 * This method will get called in fresh mode for first time.
@@ -142,9 +142,14 @@ public class GoogleMapScraper implements Scraper {
 			for (int i = 0 ; i < size ; ++i) {
 				PlacesDetailsPojo placesDetailsPojo ;
 
-				Thread.sleep(9000);
-				List<WebElement> elementList = fireFoxWebDriver.findElements(By.xpath(".//*[@class='widget-pane-section-result']"));
-				Thread.sleep(12000);
+				List<WebElement> elementList = null;
+				try {
+					Thread.sleep(9000);
+					elementList = fireFoxWebDriver.findElements(By.xpath(".//*[@class='widget-pane-section-result']"));
+					Thread.sleep(12000);
+				} catch (NoSuchElementException e1) {
+
+				}
 
 				if(elementList!=null){
 					if(!elementList.isEmpty()){
@@ -169,12 +174,19 @@ public class GoogleMapScraper implements Scraper {
 							break;
 						} 
 					}else{
-						logger.log(Level.INFO,"Scraping Successfully Completed...");
+						String finalPage = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
+						if(finalPage.equals("Make sure your search is spelled correctly.")){
+							Thread.currentThread().interrupt();
+							logger.log(Level.INFO,"Scraping Successfully Completed...");
+						}
 					}
 				}else{
-					logger.log(Level.INFO,"Scraping Successfully Completed...");
+					String finalPage = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
+					if(finalPage.equals("Make sure your search is spelled correctly.")){
+						Thread.currentThread().interrupt();
+						logger.log(Level.INFO,"Scraping Successfully Completed...");
+					}
 				}
-
 			}
 
 			dataEntryMakerForPlacesDetailsPojo = new Thread(new DataEntryMakerForPlacesDetailsPojo(placesDetailsPojoList));
@@ -182,15 +194,20 @@ public class GoogleMapScraper implements Scraper {
 
 			Thread.sleep(9000);
 
+			String finalPage = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
+			if(finalPage.equals("Make sure your search is spelled correctly.")){
+				Thread.currentThread().interrupt();
+				logger.log(Level.INFO,"Scraping Successfully Completed...");
+			}
+			
 		} catch (Exception e) {
-
 			logger.log(Level.SEVERE,"GoogleMapScraper :: startScrapingFetchList() :: Exception :: ",e);
 		}
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * This method is use to get new instance of WebDriver, along with new profile creation.
 	 * @return WebDriver
@@ -252,7 +269,7 @@ public class GoogleMapScraper implements Scraper {
 			fireFoxWebDriver = new FirefoxDriver(profile);
 
 			Thread.sleep(9000);
-			
+
 			// Launch website
 			fireFoxWebDriver.navigate().to("https://www.google.co.in/");
 			Thread.sleep(9000);
@@ -277,7 +294,7 @@ public class GoogleMapScraper implements Scraper {
 		}
 		return result;
 	}
-	
+
 
 	/**
 	 * This method fetches data and creates new PlacesDetailsPojo and returns it to startScraping().
