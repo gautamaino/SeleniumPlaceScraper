@@ -33,7 +33,7 @@ public class ScraperManagerTest {
 		try {
 			googleMapScraper = new GoogleMapScraper();
 			spaceInfoDao = new SpaceInformationDao();
-
+			
 			profile = new FirefoxProfile();
 			profile.setPreference("network.proxy.type", 1);
 			profile.setPreference("network.proxy.http", SERVER_IP);

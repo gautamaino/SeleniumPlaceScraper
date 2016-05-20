@@ -17,7 +17,7 @@ import com.ainosoft.seleniumplacescraper.manager.DataEntryMakerForPlacesDetailsP
 import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 import com.ainosoft.seleniumplacescraper.pojo.SpaceInformationPojo;
-import com.ainosoft.seleniumplacescraper.util.ProxyHolder;
+import com.ainosoft.seleniumplacescraper.proxystore.ProxyProvider;
 
 
 /**
@@ -32,7 +32,7 @@ public class GoogleMapScraper implements Scraper {
 	private WebDriver fireFoxWebDriver = null;
 	private SpaceInformationPojo spaceInfoPojo;
 	private String url;
-
+	private ProxyDetailsPojo proxyDetailsPojo = null;
 
 
 	/**
@@ -47,10 +47,9 @@ public class GoogleMapScraper implements Scraper {
 		try {
 			spaceInfoDao = new SpaceInformationDao();
 
-			ProxyHolder proxyHolder = new ProxyHolder();
-			proxyHolder.updateProxies();
-
-			fireFoxWebDriver = getFireFoxDriver(proxyHolder);
+			Thread.sleep(9000);
+			
+			fireFoxWebDriver = getFireFoxDriver();
 
 			fireFoxWebDriver.get("http://whatismyipaddress.com/");
 			Thread.sleep(8000);
@@ -100,6 +99,8 @@ public class GoogleMapScraper implements Scraper {
 				}
 			}
 
+			Thread.sleep(9000);
+			
 			startScrapingFetchList();
 
 			Thread.sleep(12000);
@@ -174,17 +175,27 @@ public class GoogleMapScraper implements Scraper {
 							break;
 						} 
 					}else{
+						try {
+							String finalPage = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
+							if(finalPage.equals("Make sure your search is spelled correctly.")){
+								Thread.currentThread().interrupt();
+								logger.log(Level.INFO,"Scraping Successfully Completed...");
+							}
+						} catch (NoSuchElementException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}else{
+					try {
 						String finalPage = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
 						if(finalPage.equals("Make sure your search is spelled correctly.")){
 							Thread.currentThread().interrupt();
 							logger.log(Level.INFO,"Scraping Successfully Completed...");
 						}
-					}
-				}else{
-					String finalPage = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
-					if(finalPage.equals("Make sure your search is spelled correctly.")){
-						Thread.currentThread().interrupt();
-						logger.log(Level.INFO,"Scraping Successfully Completed...");
+					} catch (NoSuchElementException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}
@@ -194,10 +205,15 @@ public class GoogleMapScraper implements Scraper {
 
 			Thread.sleep(9000);
 
-			String finalPage = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
-			if(finalPage.equals("Make sure your search is spelled correctly.")){
-				Thread.currentThread().interrupt();
-				logger.log(Level.INFO,"Scraping Successfully Completed...");
+			try {
+				String finalPage = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
+				if(finalPage.equals("Make sure your search is spelled correctly.")){
+					Thread.currentThread().interrupt();
+					logger.log(Level.INFO,"Scraping Successfully Completed...");
+				}
+			} catch (NoSuchElementException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			
 		} catch (Exception e) {
@@ -212,25 +228,19 @@ public class GoogleMapScraper implements Scraper {
 	 * This method is use to get new instance of WebDriver, along with new profile creation.
 	 * @return WebDriver
 	 */
-	public WebDriver getFireFoxDriver(ProxyHolder proxyHolder){
+	public WebDriver getFireFoxDriver(){
 		WebDriver fireFoxWebDriver = null;	
 		FirefoxProfile profile = null;
-		ProxyDetailsPojo proxyDetailsPojo;
 		try {
-			int proxyCount = spaceInfoPojo.getPageCount();
+			
+			Thread.sleep(9000);
+			
 			while(true){
-
-				if(proxyCount==proxyHolder.getAllProxyList().size()){
-					proxyDetailsPojo = proxyHolder.getNewProxy(proxyCount--);	
-				}else if(proxyCount<proxyHolder.getAllProxyList().size()){
-					proxyDetailsPojo = proxyHolder.getNewProxy(proxyCount);	
-				}else{
-					proxyDetailsPojo = proxyHolder.getNewProxy(0);
-				}
-
 				String serverIP = proxyDetailsPojo.getIpAddress();
 				Integer port = Integer.parseInt(proxyDetailsPojo.getIpPort());
 
+				logger.log(Level.INFO,"IP is : "+serverIP+"PORT is :"+port);
+				
 				boolean result = checkForValidIp(serverIP,port);
 				if(result){
 					profile = new FirefoxProfile();
@@ -241,10 +251,18 @@ public class GoogleMapScraper implements Scraper {
 					fireFoxWebDriver = new FirefoxDriver(profile);
 					break;
 				}else{
-					proxyCount++;
-					getFireFoxDriver(proxyHolder);
+					ProxyProvider proxyProvider = new ProxyProvider();
+					
+					if(proxyProvider.getNextProxy()!=null){
+						proxyDetailsPojo = proxyProvider.getNextProxy();	
+					}
+					
+					continue;
 				}
 			}
+
+			Thread.sleep(9000);
+
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,"ScraperManager :: getFireFoxDriver() :: Exception :: ",e);
 		}
@@ -476,4 +494,9 @@ public class GoogleMapScraper implements Scraper {
 		this.fireFoxWebDriver = fireFoxWebDriver;
 	}
 
+	public void setProxyDetailsPojo(ProxyDetailsPojo proxyDetailsPojo) {
+		this.proxyDetailsPojo = proxyDetailsPojo;
+	}
+
+	
 }

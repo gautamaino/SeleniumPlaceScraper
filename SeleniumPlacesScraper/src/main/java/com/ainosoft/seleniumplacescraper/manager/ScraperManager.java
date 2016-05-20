@@ -3,6 +3,7 @@ package com.ainosoft.seleniumplacescraper.manager;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 import com.ainosoft.seleniumplacescraper.pojo.SpaceInformationPojo;
 import com.ainosoft.seleniumplacescraper.scraper.GoogleMapScraper;
 
@@ -17,10 +18,12 @@ public class ScraperManager implements Runnable,Manager{
 	private String url;
 	private SpaceInformationPojo spaceInfoPojo = null;
 	private Logger logger = Logger.getLogger(this.getClass().getName());
-
-	public ScraperManager(String url,SpaceInformationPojo spaceInfoPojo){
+	private ProxyDetailsPojo proxyDetailsPojo;
+	
+	public ScraperManager(String url,SpaceInformationPojo spaceInfoPojo,ProxyDetailsPojo proxyDetailsPojo){
 		this.url = url;
 		this.spaceInfoPojo = spaceInfoPojo;
+		this.proxyDetailsPojo = proxyDetailsPojo;
 	}
 
 	@Override
@@ -40,7 +43,7 @@ public class ScraperManager implements Runnable,Manager{
 	 * This method is use to initialize and start the scraping in fresh mode if the pagecount is less than 1.
 	 * @param proxyHolder 
 	 */
-	public void initializeAndStart(String url,String textToSearch,String city){
+	public void initializeAndStart(String url, String textToSearch, String city){
 		GoogleMapScraper googleMapScraper = null;
 		try {
 			googleMapScraper = new GoogleMapScraper();
@@ -50,6 +53,9 @@ public class ScraperManager implements Runnable,Manager{
 			while (true) {
 				googleMapScraper.setUrl(this.url);
 				googleMapScraper.setSpaceInfoPojo(spaceInfoPojo);
+				googleMapScraper.setProxyDetailsPojo(proxyDetailsPojo);
+				
+				Thread.sleep(9000);
 				
 				googleMapScraper.reRunScraping();
 

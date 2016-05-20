@@ -4,7 +4,6 @@ package com.ainosoft.seleniumplacescraper.dao;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +34,7 @@ public class ProxyDetailsDao {
 		try {
 			return HibernateUtil.getSessionFactory();
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"ProxyManager :: getSessionFactory() ::",e); 
+			logger.log(Level.SEVERE,"ProxyDetailsDao :: getSessionFactory() ::",e); 
 		}
 		return sessionFactory;
 	}
@@ -67,7 +66,7 @@ public class ProxyDetailsDao {
 			transaction.commit();
 			return proxyPojo;
 		} catch (RuntimeException re) {
-			logger.log(Level.SEVERE,"ProxyManager :: getSessionFactory() ::",re); 
+			logger.log(Level.SEVERE,"ProxyDetailsDao :: saveProxyPojo() ::",re); 
 			transaction.rollback();
 			throw re;
 		}finally{
@@ -95,7 +94,7 @@ public class ProxyDetailsDao {
 			}			
 			transaction.commit();
 		} catch (RuntimeException re) {
-			logger.log(Level.SEVERE,"ProxyManager :: updateProxyStatus() ::",re); 
+			logger.log(Level.SEVERE,"ProxyDetailsDao :: updateProxyStatus() ::",re); 
 			transaction.rollback();
 			throw re;
 		}finally{
@@ -111,19 +110,48 @@ public class ProxyDetailsDao {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<ProxyDetailsPojo> getValidProxyList() throws Exception {
+	public ArrayList<ProxyDetailsPojo> getValidProxyList(int proxyCount) throws Exception {
 		Session session=null;
 		try{
 			session = HibernateUtil.getSessionFactory().openSession();
 			Query query = session.createQuery("from ProxyDetailsPojo where status = 1");
-			query.setMaxResults(100);
+			query.setFirstResult(proxyCount);
+			query.setMaxResults(50);
 			
 			@SuppressWarnings("unchecked")
-			List<ProxyDetailsPojo> proxyDetailsPojoList = query.list();
+			ArrayList<ProxyDetailsPojo> proxyDetailsPojoList = (ArrayList<ProxyDetailsPojo>) query.list();
 
 			return proxyDetailsPojoList;
 		}catch(Exception e){
-			logger.log(Level.SEVERE,"ProxyManager :: updateProxyStatus() ::",e); 
+			logger.log(Level.SEVERE,"ProxyDetailsDao :: getValidProxyList() ::",e); 
+			throw e;
+		}finally{
+			if(session != null){
+				session.flush();
+				session.close();
+			}
+		}
+	}
+	
+	/**
+	 * This method returns arraylist of valid proxies
+	 * @return
+	 * @throws Exception
+	 */
+	public ArrayList<ProxyDetailsPojo> getValidProxyList() throws Exception {
+		Session session=null;
+		try{
+			session = HibernateUtil.getSessionFactory().openSession();
+			Query query = session.createQuery("from ProxyDetailsPojo where status = 1");
+			//query.setFirstResult(proxyCount);
+			query.setMaxResults(50);
+			
+			@SuppressWarnings("unchecked")
+			ArrayList<ProxyDetailsPojo> proxyDetailsPojoList = (ArrayList<ProxyDetailsPojo>) query.list();
+
+			return proxyDetailsPojoList;
+		}catch(Exception e){
+			logger.log(Level.SEVERE,"ProxyDetailsDao :: getValidProxyList() ::",e); 
 			throw e;
 		}finally{
 			if(session != null){
@@ -151,7 +179,7 @@ public class ProxyDetailsDao {
 			}
 			transaction.commit();
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"ProxyManager :: saveProxyListToDatabase() ::",e); 
+			logger.log(Level.SEVERE,"ProxyDetailsDao :: saveProxyListToDatabase() ::",e); 
 		}finally{
 			if(session != null){
 				session.flush();
