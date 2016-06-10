@@ -39,7 +39,7 @@ public class PlacesDetailsPojo implements java.io.Serializable {
 	private String timings;
 	private Date createdOn;
 	private Date modifiedOn;
-	private String spaceType;
+	private String reviews;
 
 	public PlacesDetailsPojo() {
 	}
@@ -52,7 +52,7 @@ public class PlacesDetailsPojo implements java.io.Serializable {
 			String placeAddress, String placeWebsite, String placePhoneNo,
 			String longitude, String latitude, String placeUrl, String image,
 			String rating, String webElement, String timings, Date createdOn,
-			Date modifiedOn, String spaceType) {
+			Date modifiedOn, String reviews) {
 		this.placeName = placeName;
 		this.placeType = placeType;
 		this.placeCity = placeCity;
@@ -68,7 +68,7 @@ public class PlacesDetailsPojo implements java.io.Serializable {
 		this.timings = timings;
 		this.createdOn = createdOn;
 		this.modifiedOn = modifiedOn;
-		this.spaceType = spaceType;
+		this.reviews = reviews;
 	}
 
 	@Id
@@ -190,7 +190,7 @@ public class PlacesDetailsPojo implements java.io.Serializable {
 		this.webElement = webElement;
 	}
 
-	@Column(name = "timings", length = 50)
+	@Column(name = "timings", length = 500)
 	public String getTimings() {
 		return this.timings;
 	}
@@ -219,13 +219,13 @@ public class PlacesDetailsPojo implements java.io.Serializable {
 		this.modifiedOn = modifiedOn;
 	}
 
-	@Column(name = "space_type", length = 100)
-	public String getSpaceType() {
-		return this.spaceType;
+	@Column(name = "reviews")
+	public String getReviews() {
+		return this.reviews;
 	}
 
-	public void setSpaceType(String spaceType) {
-		this.spaceType = spaceType;
+	public void setReviews(String reviews) {
+		this.reviews = reviews;
 	}
 
 }

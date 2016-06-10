@@ -1,14 +1,18 @@
 package com.ainosoft.seleniumplacescraper.scraper;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 
@@ -17,7 +21,7 @@ import com.ainosoft.seleniumplacescraper.manager.DataEntryMakerForPlacesDetailsP
 import com.ainosoft.seleniumplacescraper.pojo.PlacesDetailsPojo;
 import com.ainosoft.seleniumplacescraper.pojo.ProxyDetailsPojo;
 import com.ainosoft.seleniumplacescraper.pojo.SpaceInformationPojo;
-import com.ainosoft.seleniumplacescraper.proxystore.ProxyProvider;
+import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 
 
 /**
@@ -33,6 +37,10 @@ public class GoogleMapScraper implements Scraper {
 	private SpaceInformationPojo spaceInfoPojo;
 	private String url;
 	private ProxyDetailsPojo proxyDetailsPojo = null;
+	private ArrayList<ProxyDetailsPojo> proxyDetailsPojoList;
+	private boolean endOfScraperFlag = false;
+	private int timer = 19000;
+
 
 
 	/**
@@ -47,36 +55,42 @@ public class GoogleMapScraper implements Scraper {
 		try {
 			spaceInfoDao = new SpaceInformationDao();
 
-			Thread.sleep(9000);
-			
+			Thread.sleep(timer);
+
 			fireFoxWebDriver = getFireFoxDriver();
 
 			fireFoxWebDriver.get("http://whatismyipaddress.com/");
-			Thread.sleep(8000);
+			Thread.sleep(timer);
 
 			// Launch website
 			fireFoxWebDriver.navigate().to(url);
-			Thread.sleep(8000);
+			Thread.sleep(timer);
 
 			// Maximize the browser
 			//fireFoxWebDriver.manage().window().maximize();
 
-			// Enter value 50 in the second number of the percent Calculator
 			try {
-				WebElement searchTextBox = fireFoxWebDriver.findElement(By.xpath(".//*[@id='searchboxinput']"));
-				searchTextBox.sendKeys(spaceInfoPojo.getSpaceType()+" "+"in"+" "+spaceInfoPojo.getSpaceCity());
+				Thread.sleep(timer);
 
-				Thread.sleep(9000);
+				WebElement searchTextBox = fireFoxWebDriver.findElement(By.xpath(".//*[@id='searchboxinput']"));
+
+				if(spaceInfoPojo.getSpaceType()!=null && spaceInfoPojo.getSpaceCity()!=null){
+					searchTextBox.sendKeys(spaceInfoPojo.getSpaceType()+" "+"in"+" "+spaceInfoPojo.getSpaceCity());	
+				}
+
+				Thread.sleep(timer);
 			} catch (NoSuchElementException e) {
 
 			}
 
 			try {
+				Thread.sleep(timer);
+
 				// Click search Button
 				WebElement searchButton = fireFoxWebDriver.findElement(By.xpath(".//*[@id='searchbox']/div[1]/button"));
 				searchButton.click();
 
-				Thread.sleep(9000);
+				Thread.sleep(timer);
 			} catch (NoSuchElementException e) {
 
 			}
@@ -84,12 +98,12 @@ public class GoogleMapScraper implements Scraper {
 			while(!(pCount == spaceInfoPojo.getPageCount())){
 				try {
 					pCount++;
-					Thread.sleep(9000);
+					Thread.sleep(timer);
 
 					WebElement nextButton = fireFoxWebDriver.findElement(By.xpath(".//*[@id='widget-pane-section-pagination-button-next']"));
 					nextButton.click();
 
-					Thread.sleep(9000);
+					Thread.sleep(timer);
 
 				} catch (NoSuchElementException e) {
 					pCount--;
@@ -99,16 +113,16 @@ public class GoogleMapScraper implements Scraper {
 				}
 			}
 
-			Thread.sleep(9000);
-			
+			Thread.sleep(timer);
+
 			startScrapingFetchList();
 
-			Thread.sleep(12000);
+			Thread.sleep(timer);
 
 			try {
 				WebElement nextButton = fireFoxWebDriver.findElement(By.xpath(".//*[@id='widget-pane-section-pagination-button-next']"));
 				nextButton.click();
-				Thread.sleep(9000);
+				Thread.sleep(timer);
 				pCount++;
 			} catch (NoSuchElementException e) {
 				spaceInfoPojo.setPageCount(pCount);
@@ -118,7 +132,7 @@ public class GoogleMapScraper implements Scraper {
 			spaceInfoPojo.setPageCount(pCount);
 			spaceInfoDao.updatePageCount(spaceInfoPojo);
 
-			Thread.sleep(9000);
+			Thread.sleep(timer);
 
 			fireFoxWebDriver.close();
 		} catch (Exception e) {
@@ -145,9 +159,9 @@ public class GoogleMapScraper implements Scraper {
 
 				List<WebElement> elementList = null;
 				try {
-					Thread.sleep(9000);
+					Thread.sleep(timer);
 					elementList = fireFoxWebDriver.findElements(By.xpath(".//*[@class='widget-pane-section-result']"));
-					Thread.sleep(12000);
+					Thread.sleep(timer);
 				} catch (NoSuchElementException e1) {
 
 				}
@@ -155,9 +169,9 @@ public class GoogleMapScraper implements Scraper {
 				if(elementList!=null){
 					if(!elementList.isEmpty()){
 
-						Thread.sleep(9000);
+						Thread.sleep(timer);
 						elementList.get(i).click();
-						Thread.sleep(9000);
+						Thread.sleep(timer);
 
 						size = elementList.size();
 
@@ -165,37 +179,49 @@ public class GoogleMapScraper implements Scraper {
 
 						placesDetailsPojoList.add(placesDetailsPojo);
 
-						Thread.sleep(9000);
+						Thread.sleep(timer);
 
 						try {
-							//returning back to the first page
+							//returning back to the page which contains list
 							fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/button")).click();
-							Thread.sleep(9000);
+							Thread.sleep(timer);
 						} catch (NoSuchElementException e) {
 							break;
 						} 
 					}else{
 						try {
+							Thread.sleep(timer);
+
 							String finalPage = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
 							if(finalPage.equals("Make sure your search is spelled correctly.")){
+								SpaceInformationDao spaceInformationDao = new SpaceInformationDao();
+								spaceInfoPojo.setCategory_completion_status(true);
+								spaceInformationDao.updateCategoryCompletionStatus(spaceInfoPojo);
+
+								endOfScraperFlag = true;
 								Thread.currentThread().interrupt();
 								logger.log(Level.INFO,"Scraping Successfully Completed...");
 							}
 						} catch (NoSuchElementException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							
 						}
 					}
 				}else{
 					try {
+						Thread.sleep(timer);
+
 						String finalPage = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
 						if(finalPage.equals("Make sure your search is spelled correctly.")){
+							SpaceInformationDao spaceInformationDao = new SpaceInformationDao();
+							spaceInfoPojo.setCategory_completion_status(true);
+							spaceInformationDao.updateCategoryCompletionStatus(spaceInfoPojo);
+
+							endOfScraperFlag = true;
 							Thread.currentThread().interrupt();
 							logger.log(Level.INFO,"Scraping Successfully Completed...");
 						}
 					} catch (NoSuchElementException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+	
 					}
 				}
 			}
@@ -203,25 +229,30 @@ public class GoogleMapScraper implements Scraper {
 			dataEntryMakerForPlacesDetailsPojo = new Thread(new DataEntryMakerForPlacesDetailsPojo(placesDetailsPojoList));
 			dataEntryMakerForPlacesDetailsPojo.start();
 
-			Thread.sleep(9000);
+			Thread.sleep(timer);
 
 			try {
-				String finalPage = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
-				if(finalPage.equals("Make sure your search is spelled correctly.")){
+				Thread.sleep(timer);
+
+				String finalPageString = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[2]/div[1]/div[2]/span[1]")).getText();
+				if(finalPageString.equals("Make sure your search is spelled correctly.")){
+
+					SpaceInformationDao spaceInformationDao = new SpaceInformationDao();
+					spaceInfoPojo.setCategory_completion_status(true);
+					spaceInformationDao.updateCategoryCompletionStatus(spaceInfoPojo);
+
+					endOfScraperFlag = true;
 					Thread.currentThread().interrupt();
 					logger.log(Level.INFO,"Scraping Successfully Completed...");
 				}
 			} catch (NoSuchElementException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
 			}
-			
+
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,"GoogleMapScraper :: startScrapingFetchList() :: Exception :: ",e);
 		}
 	}
-
-
 
 
 	/**
@@ -232,15 +263,16 @@ public class GoogleMapScraper implements Scraper {
 		WebDriver fireFoxWebDriver = null;	
 		FirefoxProfile profile = null;
 		try {
-			
-			Thread.sleep(9000);
-			
+
+			Thread.sleep(timer);
+
 			while(true){
+
 				String serverIP = proxyDetailsPojo.getIpAddress();
 				Integer port = Integer.parseInt(proxyDetailsPojo.getIpPort());
 
-				logger.log(Level.INFO,"IP is : "+serverIP+"PORT is :"+port);
-				
+				logger.log(Level.INFO,"IP is : "+serverIP+" PORT is :"+port);
+
 				boolean result = checkForValidIp(serverIP,port);
 				if(result){
 					profile = new FirefoxProfile();
@@ -248,20 +280,22 @@ public class GoogleMapScraper implements Scraper {
 					profile.setPreference("network.proxy.http", serverIP);
 					profile.setPreference("network.proxy.http_port", port);
 
-					fireFoxWebDriver = new FirefoxDriver(profile);
+					// Setup firefox binary to start in Xvfb        
+			        String Xport = System.getProperty("lmportal.xvfb.id", ":1");
+			        final File firefoxPath = new File(System.getProperty("lmportal.deploy.firefox.path", "/usr/bin/firefox"));
+
+			        FirefoxBinary firefoxBinary = new FirefoxBinary(firefoxPath);
+			        firefoxBinary.setEnvironmentProperty("DISPLAY", Xport);
+
+					fireFoxWebDriver = new FirefoxDriver(firefoxBinary,profile);
 					break;
 				}else{
-					ProxyProvider proxyProvider = new ProxyProvider();
-					
-					if(proxyProvider.getNextProxy()!=null){
-						proxyDetailsPojo = proxyProvider.getNextProxy();	
-					}
-					
+					getNextProxy(serverIP);	
 					continue;
 				}
 			}
 
-			Thread.sleep(9000);
+			Thread.sleep(timer);
 
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,"ScraperManager :: getFireFoxDriver() :: Exception :: ",e);
@@ -275,7 +309,7 @@ public class GoogleMapScraper implements Scraper {
 	 * @return WebDriver
 	 */
 	public boolean checkForValidIp(String ipAddress,int port){
-		WebDriver fireFoxWebDriver = null;	
+		WebDriver fireFoxWebDriverToCheck = null;	
 		FirefoxProfile profile = null;
 		boolean result = false;
 		try {
@@ -284,17 +318,24 @@ public class GoogleMapScraper implements Scraper {
 			profile.setPreference("network.proxy.http", ipAddress);
 			profile.setPreference("network.proxy.http_port", port);
 
-			fireFoxWebDriver = new FirefoxDriver(profile);
+			// Setup firefox binary to start in Xvfb        
+	        String Xport = System.getProperty("lmportal.xvfb.id", ":1");
+	        final File firefoxPath = new File(System.getProperty("lmportal.deploy.firefox.path", "/usr/bin/firefox"));
 
-			Thread.sleep(9000);
+	        FirefoxBinary firefoxBinary = new FirefoxBinary(firefoxPath);
+	        firefoxBinary.setEnvironmentProperty("DISPLAY", Xport);
+
+			fireFoxWebDriverToCheck = new FirefoxDriver(firefoxBinary,profile);
+
+			Thread.sleep(timer);
 
 			// Launch website
-			fireFoxWebDriver.navigate().to("https://www.google.co.in/");
-			Thread.sleep(9000);
+			fireFoxWebDriverToCheck.navigate().to("https://www.google.co.in/");
+			Thread.sleep(timer);
 
 			try {
-				String googleName = fireFoxWebDriver.findElement(By.xpath(".//*[@class='logo-subtext']")).getText();
-				Thread.sleep(9000);
+				String googleName = fireFoxWebDriverToCheck.findElement(By.xpath(".//*[@class='logo-subtext']")).getText();
+				Thread.sleep(timer);
 
 				if(googleName.equals("India")){
 					result = true;
@@ -306,9 +347,9 @@ public class GoogleMapScraper implements Scraper {
 			}
 
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"ScraperManager :: getFireFoxDriver() :: Exception :: ",e);
+			logger.log(Level.SEVERE,"ScraperManager :: checkForValidIp() :: Exception :: ",e);
 		}finally{
-			fireFoxWebDriver.close();
+			fireFoxWebDriverToCheck.close();
 		}
 		return result;
 	}
@@ -327,8 +368,7 @@ public class GoogleMapScraper implements Scraper {
 			String name = null;
 			try {
 				name = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[1]/div[2]/div[1]/h1")).getText();
-				//logger.log(Level.INFO,"Type : "+name);
-				Thread.sleep(5000);
+				Thread.sleep(timer);
 			} catch (NoSuchElementException e) {
 
 			}
@@ -336,8 +376,7 @@ public class GoogleMapScraper implements Scraper {
 			String type = null;
 			try {
 				type = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[1]/div[2]/div[2]/div[2]/span/span[1]/button")).getText();
-				//logger.log(Level.INFO,"Type : "+type);
-				//Thread.sleep(3000);
+				Thread.sleep(timer);
 			} catch (NoSuchElementException e) {
 				//break;
 			}
@@ -345,8 +384,7 @@ public class GoogleMapScraper implements Scraper {
 			String email = null;
 			try {
 				email = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[6]/div/span[2]/span[1]/span[2]/span/a[2]")).getText();
-				//logger.log(Level.INFO,"Email : "+email);
-				//Thread.sleep(3000);
+				Thread.sleep(timer);
 			} catch (NoSuchElementException e) {
 
 			}
@@ -354,19 +392,17 @@ public class GoogleMapScraper implements Scraper {
 			String address = null;
 			try {
 				address = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[5]/div/span[2]/span[1]/span[1]/span")).getText();
-				//logger.log(Level.INFO,"Address : "+address);
-				Thread.sleep(5000);
+				Thread.sleep(timer);
 			} catch (NoSuchElementException e) {
 
 			}
 
-			Thread.sleep(8000);
+			Thread.sleep(timer);
 
 			String phoneNumber = null;
 			try {
 				phoneNumber = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[6]/div/span[2]/span[1]/a")).getText();
-				//logger.log(Level.INFO,"PhoneNumber : "+phoneNumber);
-				//Thread.sleep(3000);
+				Thread.sleep(timer);
 			} catch (NoSuchElementException e) {
 
 			}
@@ -374,68 +410,99 @@ public class GoogleMapScraper implements Scraper {
 			String ratings = null;
 			try {
 				ratings = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[1]/div[2]/div[2]/div[1]/span[1]/span/span")).getText();
-				//logger.log(Level.INFO,"Ratings : "+ratings);
-				//Thread.sleep(3000);
+				Thread.sleep(timer);
 			} catch (NoSuchElementException e) {
 
 			}
 
-			String timing = null;
+			String mainTitleImageURL = null;
 			try {
-				timing = fireFoxWebDriver.findElement(By.className("widget-pane-section-info-hour-text")).getText();
-				//logger.log(Level.INFO,"Timing : "+timing);
-				Thread.sleep(3000);
+				mainTitleImageURL = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[1]/button[1]/img")).getAttribute("src");
+				Thread.sleep(timer);
 			} catch (NoSuchElementException e) {
 
 			}
 
-			String imageURL = null;
-			try {
-				imageURL = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[1]/button[1]/img")).getAttribute("src");
-				//logger.log(Level.INFO,"ImageURL : "+imageURL);
-				//Thread.sleep(3000);
-			} catch (NoSuchElementException e) {
-
-			}
-
-			String diveWholeWeb = null;
+			String wholeDiv = null;
 			try {
 				WebElement divWeb = fireFoxWebDriver.findElement(By.xpath(".//*[@class='widget-pane widget-pane-visible']"));
-				diveWholeWeb = divWeb.getAttribute("innerHTML");
-				Thread.sleep(3000);
+				wholeDiv = divWeb.getAttribute("innerHTML");
+				Thread.sleep(timer);
 			} catch (NoSuchElementException e) {
 
 			}
+			
+			/***************************************From this line it will scrape data for timing***********************************/
+			
+			ArrayList<String> timeTableList  = getTimeTableList();
+			StringBuffer timings = new StringBuffer();
+			if(timeTableList!=null){
+				if(!(timeTableList.isEmpty())){
+					for (String timetable : timeTableList) {
+						if(timetable!=""){
+							timings.append("####"+timetable);	
+						}
+					}					
+				}
+			}
+			placesDetailsPojo.setTimings(timings.toString());
+			
+			/***************************************From this line it will scrape data for reviews***********************************/
+			
+			ArrayList<String> reviewList = new ArrayList<String>();
 
-			Thread.sleep(9000);
+			try {
+				List<WebElement> listOfReviews = fireFoxWebDriver.findElements(By.xpath(".//*[@class='widget-pane-section-review ripple-container']"));
+				for (WebElement reviews:listOfReviews){
+					String review = reviews.getText();
+					reviewList.add(review);
+				}
+			} catch (NoSuchElementException e) {
+				
+			}
+
+			StringBuffer allReviews = new StringBuffer();
+			if(reviewList!=null){
+				if(!(reviewList.isEmpty())){
+					for (String review : reviewList) {
+						if(review!=""){
+							allReviews.append("&&"+review);	
+						}
+					}					
+				}
+			}
+
+
+			placesDetailsPojo.setReviews(allReviews.toString());
+			Thread.sleep(timer);
 
 			String url = fireFoxWebDriver.getCurrentUrl();
-
 
 			StringBuffer latitude = new StringBuffer();
 			StringBuffer longitude = new StringBuffer();
 
 			try {
-				int b = url.indexOf("@");
-				int c = url.indexOf(",");
-				int d = url.lastIndexOf(",");
+				int onAtSymbol = url.indexOf("@");
+				int onCommaOperator = url.indexOf(",");
+				int onSecondCommaOperator = url.lastIndexOf(",");
 
-				if(b!=0 && c!=0){
-					if(url.substring(b+1,c)!=null){
-						latitude.append(url.substring(b+1,c));	
+				if(onAtSymbol!=0 && onCommaOperator!=0){
+					if(url.substring(onAtSymbol+1,onCommaOperator)!=null){
+						latitude.append(url.substring(onAtSymbol+1,onCommaOperator));	
 					}
 				}
 
-				if(c!=0 && d!=0){
-					if(url.substring(c+1, d)!=null){
-						longitude.append(url.substring(c+1, d));	
+				if(onCommaOperator!=0 && onSecondCommaOperator!=0){
+					if(url.substring(onCommaOperator+1, onSecondCommaOperator)!=null){
+						longitude.append(url.substring(onCommaOperator+1, onSecondCommaOperator));	
 					}
 				}
 			} catch (Exception e) {
 				if(e.equals("StringIndexOutOfBoundException")){
-					//break;	
+						
 				}
 			}
+
 
 			placesDetailsPojo.setPlaceName(name);
 			placesDetailsPojo.setPlaceType(type);
@@ -462,11 +529,10 @@ public class GoogleMapScraper implements Scraper {
 			}
 
 			placesDetailsPojo.setRating(ratings);
-			placesDetailsPojo.setTimings(timing);
-			placesDetailsPojo.setWebElement(diveWholeWeb);
-			placesDetailsPojo.setImage(imageURL);
+			placesDetailsPojo.setWebElement(wholeDiv);
+			placesDetailsPojo.setImage(mainTitleImageURL);
 
-			Thread.sleep(9000);
+			Thread.sleep(timer);
 
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,"GoogleMapScraper :: getPlacesDetailsPojo() :: Exception :: ",e);
@@ -475,6 +541,319 @@ public class GoogleMapScraper implements Scraper {
 	}
 
 
+	public void getNextProxy(String ipAddress){
+		try {
+			for (int i = 0; i < proxyDetailsPojoList.size(); i++) {
+				String ip = proxyDetailsPojoList.get(i).getIpAddress();
+				if(!(ipAddress.equals(ip))){
+					proxyDetailsPojo = proxyDetailsPojoList.get(i);	
+					break;
+				}
+			}
+		} catch (Exception e) {
+			logger.log(Level.SEVERE,"GoogleMapScraper :: getNextProxy() :: Exception :: ",e);
+		}
+	}
+
+	/**
+	 * this method will return list of timetable with days and it's timing
+	 * @return ArrayList<String>
+	 */
+	public ArrayList<String> getTimeTableList() {
+		ArrayList<String> timeTableList = new ArrayList<String>();
+		try {
+			/*String timing = null;
+			try {
+				timing = fireFoxWebDriver.findElement(By.className("widget-pane-section-info-hour-text")).getText();
+				//logger.log(Level.INFO,"Timing : "+timing);
+				Thread.sleep(timer);
+			} catch (NoSuchElementException e) {
+
+			}*/
+			
+			try {
+				Thread.sleep(timer);
+
+				WebElement timingDropDownButton = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[1]/button"));
+				timingDropDownButton.click();
+
+				Thread.sleep(timer);
+			}catch (NoSuchElementException exception) {
+				
+			}catch(WebDriverException we){
+				
+			}catch(ElementNotFoundException e){
+				
+			}
+			
+			String today = null;
+			try {
+				Thread.sleep(3000);
+				today = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[1]/th/div[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String todayTimingFirst = null;
+			try {
+				Thread.sleep(3000);
+				todayTimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[1]/td/ul/li[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			try {
+				todayTimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[1]/td/ul/li")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String todayTimingSecond = null;
+			try {
+				todayTimingSecond = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[1]/td/ul/li[2]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			if((today!="" && today!=null) && (todayTimingFirst!="" && todayTimingFirst!=null) && todayTimingSecond!="" && todayTimingSecond!=null){
+				String str = "$$"+today+"&&"+todayTimingFirst+"&&"+todayTimingSecond+"&&";
+				timeTableList.add(str);
+			}else if((today!="" && today!=null) && (todayTimingFirst!="" && todayTimingFirst!=null)){
+				String str = "$$"+today+"&&"+todayTimingFirst+"&&";
+				timeTableList.add(str);
+			}
+			
+			
+			String day1 = null;
+			try {
+				Thread.sleep(3000);
+				day1 = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[2]/th/div[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day1TimingFirst = null;
+			try {
+				day1TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[2]/td/ul/li[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+
+			try {
+				day1TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[2]/td/ul/li")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day1TimingSecond = null;
+			try {
+				day1TimingSecond = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[2]/td/ul/li[2]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			if((day1!="" && day1!=null) && (day1TimingFirst!="" && day1TimingFirst!=null) && day1TimingSecond!="" && day1TimingSecond!=null){
+				String str = "$$"+day1+"&&"+day1TimingFirst+"&&"+day1TimingSecond+"&&";
+				timeTableList.add(str);
+			}else if((day1!="" && day1!=null) && (day1TimingFirst!="" && day1TimingFirst!=null)){
+				String str = "$$"+day1+"&&"+day1TimingFirst+"&&";
+				timeTableList.add(str);
+			}
+			
+			
+			String day2 = null;
+			try {
+				day2 = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[3]/th/div[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day2TimingFirst = null;
+			try {
+				day2TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[3]/td/ul/li[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			try {
+				day2TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[3]/td/ul/li")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day2TimingSecond = null;
+			try {
+				Thread.sleep(3000);
+				day2TimingSecond = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[3]/td/ul/li[2]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			if((day2!="" && day2!=null) && (day2TimingFirst!="" && day2TimingFirst!=null) && day2TimingSecond!="" && day2TimingSecond!=null){
+				String str = "$$"+day2+"&&"+day2TimingFirst+"&&"+day2TimingSecond+"&&";
+				timeTableList.add(str);
+			}else if((day2!="" && day2!=null) && (day2TimingFirst!="" && day2TimingFirst!=null)){
+				String str = "$$"+day2+"&&"+day2TimingFirst+"&&";
+				timeTableList.add(str);
+			}
+			
+			
+			String day3 = null;
+			try {
+				day3 = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[4]/th/div[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day3TimingFirst = null;
+			try {
+				day3TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[4]/td/ul/li[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			try {
+				Thread.sleep(3000);
+				day3TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[4]/td/ul/li")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day3TimingSecond = null;
+			try {
+				day3TimingSecond = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[4]/td/ul/li[2]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			if((day3!="" && day3!=null) && (day3TimingFirst!="" && day3TimingFirst!=null) && day3TimingSecond!="" && day3TimingSecond!=null){
+				String str = "$$"+day3+"&&"+day3TimingFirst+"&&"+day3TimingSecond+"&&";
+				timeTableList.add(str);
+			}else if((day3!="" && day3!=null) && (day3TimingFirst!="" && day3TimingFirst!=null)){
+				String str = "$$"+day3+"&&"+day3TimingFirst+"&&";
+				timeTableList.add(str);
+			}
+			
+			String day4 = null;
+			try {
+				day4 = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[5]/th/div[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day4TimingFirst = null;
+			try {
+				day4TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[5]/td/ul/li[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			try {
+				day4TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[5]/td/ul/li")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day4TimingSecond = null;
+			try {
+				Thread.sleep(3000);
+				day4TimingSecond = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[5]/td/ul/li[2]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			if((day4!="" && day4!=null) && (day4TimingFirst!="" && day4TimingFirst!=null) && day4TimingSecond!="" && day4TimingSecond!=null){
+				String str = "$$"+day4+"&&"+day4TimingFirst+"&&"+day4TimingSecond+"&&";
+				timeTableList.add(str);
+			}else if((day4!="" && day4!=null) && (day4TimingFirst!="" && day4TimingFirst!=null)){
+				String str = "$$"+day4+"&&"+day4TimingFirst+"&&";
+				timeTableList.add(str);
+			}
+			
+			
+			String day5 = null;
+			try {
+				day5 = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[6]/th/div[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day5TimingFirst = null;
+			try {
+				day5TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[6]/td/ul/li[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			try {
+				day5TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[6]/td/ul/li")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day5TimingSecond = null;
+			try {
+				day5TimingSecond = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[6]/td/ul/li[2]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			if((day5!="" && day5!=null) && (day5TimingFirst!="" && day5TimingFirst!=null) &&  day5TimingSecond!="" && day5TimingSecond!=null){
+				String str = "$$"+day5+"&&"+day5TimingFirst+"&&"+day5TimingSecond+"&&";
+				timeTableList.add(str);
+			}else if((day5!="" && day5!=null) && (day5TimingFirst!="" && day5TimingFirst!=null)){
+				String str = "$$"+day5+"&&"+day5TimingFirst+"&&";
+				timeTableList.add(str);
+			}
+			
+			
+			String day6 = null;
+			try {
+				Thread.sleep(3000);
+				day6 = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[7]/th/div[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day6TimingFirst = null;
+			try {
+				day6TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[7]/td/ul/li[1]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			try {
+				day6TimingFirst = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[7]/td/ul/li")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+			
+			String day6TimingSecond = null;
+			try {
+				day6TimingSecond = fireFoxWebDriver.findElement(By.xpath(".//*[@id='pane']/div/div[1]/div/div[8]/div[3]/table/tbody/tr[7]/td/ul/li[2]")).getText();
+			} catch (NoSuchElementException e) {
+				
+			}
+
+			if((day6!="" && day6!=null) && (day6TimingFirst!="" && day6TimingFirst!=null) && day6TimingSecond!="" && day6TimingSecond!=null){
+				String str = "$$"+day6+"&&"+day6TimingFirst+"&&"+day6TimingSecond+"&&";
+				timeTableList.add(str);
+			}else if((day6!="" && day6!=null) && (day6TimingFirst!="" && day6TimingFirst!=null)){
+				String str = "$$"+day6+"&&"+day6TimingFirst+"&&";
+				timeTableList.add(str);
+			}
+
+		}catch(ElementNotVisibleException e){
+			
+		}catch(ElementNotFoundException e){
+			
+		}catch(Exception e) {
+			logger.log(Level.SEVERE,"GoogleMapScraper :: getTimeTableList() :: ",e);
+		}
+		return timeTableList;
+	}
+	
+	
 	@Override
 	public void setUrl(String url) {
 		this.url = url;
@@ -482,7 +861,7 @@ public class GoogleMapScraper implements Scraper {
 
 	@Override
 	public ArrayList<ProxyDetailsPojo> startScrapingFetchProxyList() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
@@ -498,5 +877,17 @@ public class GoogleMapScraper implements Scraper {
 		this.proxyDetailsPojo = proxyDetailsPojo;
 	}
 
-	
+	public void setProxyDetailsPojoList(ArrayList<ProxyDetailsPojo> proxyDetailsPojoList) {
+		this.proxyDetailsPojoList = proxyDetailsPojoList;
+	}
+
+	public boolean isEndOfScraperFlag() {
+		return endOfScraperFlag;
+	}
+
+	public void setEndOfScraperFlag(boolean endOfScraperFlag) {
+		this.endOfScraperFlag = endOfScraperFlag;
+	}
+
+
 }

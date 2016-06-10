@@ -41,12 +41,20 @@ public class ProxyStore implements Runnable{
 				proxyCount = 0 + counter.get();	
 			}
 
-			allproxyDetailsPojoList = proxyDetailsDao.getValidProxyList(proxyCount);
-
-			if(iterationCount.get()!=null){
-				proxyCount = allproxyDetailsPojoList.size() * iterateCount;	
-			}else{
-				proxyCount = allproxyDetailsPojoList.size();
+			if(proxyDetailsDao.getValidProxyList(proxyCount)!=null){
+				if(!(proxyDetailsDao.getValidProxyList(proxyCount).isEmpty())){
+					allproxyDetailsPojoList = proxyDetailsDao.getValidProxyList(proxyCount);					
+				}
+			}
+			
+			if(allproxyDetailsPojoList!=null){
+				if(!(allproxyDetailsPojoList.isEmpty())){
+					if(iterationCount.get()!=null){
+						proxyCount = allproxyDetailsPojoList.size() * iterateCount;	
+					}else{
+						proxyCount = allproxyDetailsPojoList.size();
+					}					
+				}
 			}
 
 			counter.set(proxyCount);
@@ -62,7 +70,8 @@ public class ProxyStore implements Runnable{
 			logger.log(Level.INFO,"Proxies updated successfully...");
 
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"ProxyStore :: run() :: Exception :: ",e);
+			String exceptionMethod = "ProxyStore :: run() :: Exception :: ";
+			logger.log(Level.SEVERE,exceptionMethod,e);
 		}
 	}
 

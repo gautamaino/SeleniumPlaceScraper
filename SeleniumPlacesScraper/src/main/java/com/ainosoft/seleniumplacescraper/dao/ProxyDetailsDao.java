@@ -34,7 +34,8 @@ public class ProxyDetailsDao {
 		try {
 			return HibernateUtil.getSessionFactory();
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"ProxyDetailsDao :: getSessionFactory() ::",e); 
+			String exceptionMethod = "ProxyDetailsDao :: getSessionFactory() ::";
+			logger.log(Level.SEVERE,exceptionMethod,e); 
 		}
 		return sessionFactory;
 	}
@@ -66,7 +67,8 @@ public class ProxyDetailsDao {
 			transaction.commit();
 			return proxyPojo;
 		} catch (RuntimeException re) {
-			logger.log(Level.SEVERE,"ProxyDetailsDao :: saveProxyPojo() ::",re); 
+			String exceptionMethod = "ProxyDetailsDao :: saveProxyPojo() ::";
+			logger.log(Level.SEVERE,exceptionMethod,re); 
 			transaction.rollback();
 			throw re;
 		}finally{
@@ -94,7 +96,8 @@ public class ProxyDetailsDao {
 			}			
 			transaction.commit();
 		} catch (RuntimeException re) {
-			logger.log(Level.SEVERE,"ProxyDetailsDao :: updateProxyStatus() ::",re); 
+			String exceptionMethod = "ProxyDetailsDao :: updateProxyStatus() ::";
+			logger.log(Level.SEVERE,exceptionMethod,re); 
 			transaction.rollback();
 			throw re;
 		}finally{
@@ -116,14 +119,19 @@ public class ProxyDetailsDao {
 			session = HibernateUtil.getSessionFactory().openSession();
 			Query query = session.createQuery("from ProxyDetailsPojo where status = 1");
 			query.setFirstResult(proxyCount);
-			query.setMaxResults(50);
+			query.setMaxResults(150);
 			
 			@SuppressWarnings("unchecked")
 			ArrayList<ProxyDetailsPojo> proxyDetailsPojoList = (ArrayList<ProxyDetailsPojo>) query.list();
 
-			return proxyDetailsPojoList;
+			if(proxyDetailsPojoList!=null){
+				if(!(proxyDetailsPojoList.isEmpty())){
+					return proxyDetailsPojoList;		
+				}
+			}
 		}catch(Exception e){
-			logger.log(Level.SEVERE,"ProxyDetailsDao :: getValidProxyList() ::",e); 
+			String exceptionMethod = "ProxyDetailsDao :: getValidProxyList(proxyCount) ::";
+			logger.log(Level.SEVERE,exceptionMethod,e); 
 			throw e;
 		}finally{
 			if(session != null){
@@ -131,6 +139,7 @@ public class ProxyDetailsDao {
 				session.close();
 			}
 		}
+		return null;
 	}
 	
 	/**
@@ -151,7 +160,8 @@ public class ProxyDetailsDao {
 
 			return proxyDetailsPojoList;
 		}catch(Exception e){
-			logger.log(Level.SEVERE,"ProxyDetailsDao :: getValidProxyList() ::",e); 
+			String exceptionMethod = "ProxyDetailsDao :: getValidProxyList() ::";
+			logger.log(Level.SEVERE,exceptionMethod,e); 
 			throw e;
 		}finally{
 			if(session != null){
@@ -179,7 +189,8 @@ public class ProxyDetailsDao {
 			}
 			transaction.commit();
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"ProxyDetailsDao :: saveProxyListToDatabase() ::",e); 
+			String exceptionMethod = "ProxyDetailsDao :: saveProxyListToDatabase() ::";
+			logger.log(Level.SEVERE,exceptionMethod,e); 
 		}finally{
 			if(session != null){
 				session.flush();

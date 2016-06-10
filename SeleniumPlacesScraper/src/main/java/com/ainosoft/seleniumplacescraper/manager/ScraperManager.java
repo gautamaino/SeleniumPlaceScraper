@@ -1,5 +1,6 @@
 package com.ainosoft.seleniumplacescraper.manager;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,7 +12,7 @@ import com.ainosoft.seleniumplacescraper.scraper.GoogleMapScraper;
 /**
  * 
  * @author tushar@ainosoft.com
- * This class manages scraping and proxy management on runtime.
+ * This class manages scraping and proxy management.
  */
 public class ScraperManager implements Runnable,Manager{
 
@@ -19,11 +20,14 @@ public class ScraperManager implements Runnable,Manager{
 	private SpaceInformationPojo spaceInfoPojo = null;
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	private ProxyDetailsPojo proxyDetailsPojo;
+	private ArrayList<ProxyDetailsPojo> proxyDetailsPojoList;
+	private int timer = 15000;
 	
-	public ScraperManager(String url,SpaceInformationPojo spaceInfoPojo,ProxyDetailsPojo proxyDetailsPojo){
+	public ScraperManager(String url,SpaceInformationPojo spaceInfoPojo,ProxyDetailsPojo proxyDetailsPojo,ArrayList<ProxyDetailsPojo> proxyDetailsPojoList){
 		this.url = url;
 		this.spaceInfoPojo = spaceInfoPojo;
 		this.proxyDetailsPojo = proxyDetailsPojo;
+		this.proxyDetailsPojoList = proxyDetailsPojoList;
 	}
 
 	@Override
@@ -54,12 +58,17 @@ public class ScraperManager implements Runnable,Manager{
 				googleMapScraper.setUrl(this.url);
 				googleMapScraper.setSpaceInfoPojo(spaceInfoPojo);
 				googleMapScraper.setProxyDetailsPojo(proxyDetailsPojo);
+				googleMapScraper.setProxyDetailsPojoList(proxyDetailsPojoList);
 				
-				Thread.sleep(9000);
+				Thread.sleep(timer);
 				
 				googleMapScraper.reRunScraping();
 
-				Thread.sleep(9000);
+				if(googleMapScraper.isEndOfScraperFlag()){
+					break;
+				}
+				
+				Thread.sleep(timer);
 			}
 
 		} catch (Exception e) {

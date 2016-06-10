@@ -27,7 +27,8 @@ public class SpaceInformationDao {
 		try {
 			return HibernateUtil.getSessionFactory();
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"SpaceInformationDao :: getSessionFactory() :: Exception :: ",e);
+			String exceptionMethod = "SpaceInformationDao :: getSessionFactory() ::";
+			logger.log(Level.SEVERE,exceptionMethod,e);
 		}
 		return null;
 	}
@@ -49,7 +50,8 @@ public class SpaceInformationDao {
 
 			return restaurantPojoList;
 		}catch(Exception e){
-			logger.log(Level.SEVERE,"SpaceInformationDao :: getAllSpaceInformationPojoList() :: Exception :: ",e);
+			String exceptionMethod = "SpaceInformationDao :: getAllSpaceInformationPojoList() ::";
+			logger.log(Level.SEVERE,exceptionMethod,e);
 			throw e;
 		}finally{
 			if(session != null){
@@ -86,7 +88,8 @@ public class SpaceInformationDao {
 			transaction.commit();
 			return spaceInfo;
 		} catch (RuntimeException re) {
-			logger.log(Level.SEVERE,"SpaceInformationDao :: saveSpaceInformationPojo() :: Exception :: ",re);
+			String exceptionMethod = "SpaceInformationDao :: saveSpaceInformationPojo() ::";
+			logger.log(Level.SEVERE,exceptionMethod,re);
 			transaction.rollback();
 			throw re;
 		}finally{
@@ -99,7 +102,7 @@ public class SpaceInformationDao {
 
 
 	/**
-	 * This method updates the status of a proxy if it is found to be invalid
+	 * This method updates the status of a page count
 	 * @param spaceInfoPojo
 	 */
 	public void updatePageCount(SpaceInformationPojo spaceInfoPojo) {
@@ -115,7 +118,38 @@ public class SpaceInformationDao {
 			
 			transaction.commit();
 		} catch (RuntimeException re) {
-			logger.log(Level.SEVERE,"SpaceInformationDao :: updatePageCount() ::",re); 
+			String exceptionMethod = "SpaceInformationDao :: updatePageCount() ::";
+			logger.log(Level.SEVERE,exceptionMethod,re); 
+			transaction.rollback();
+			throw re;
+		}finally{
+			if(session != null){
+				session.flush();
+				session.close();
+			}
+		}
+	}
+	
+	
+	/**
+	 * This method updates the status of a Category Completion
+	 * @param spaceInfoPojo
+	 */
+	public void updateCategoryCompletionStatus(SpaceInformationPojo spaceInfoPojo) {
+		Session session=null;
+		Transaction transaction= null;
+		try {
+			session = HibernateUtil.getSessionFactory().openSession();
+			transaction = session.beginTransaction();
+			
+			Long id = spaceInfoPojo.getId();
+			Query query = session.createSQLQuery("update space_information set category_completion_status = "+spaceInfoPojo.getCategory_completion_status()+" where id ="+id);
+			query.executeUpdate();
+			
+			transaction.commit();
+		} catch (RuntimeException re) {
+			String exceptionMethod = "SpaceInformationDao :: updateCategoryCompletionStatus() ::";
+			logger.log(Level.SEVERE,exceptionMethod,re); 
 			transaction.rollback();
 			throw re;
 		}finally{

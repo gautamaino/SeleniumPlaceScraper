@@ -25,7 +25,8 @@ public class PlacesDetailsDao {
 		try {
 			return HibernateUtil.getSessionFactory();
 		} catch (Exception e) {
-			logger.log(Level.SEVERE,"PlacesDetailsDao :: getSessionFactory() :: Exception :: ",e);
+			String exceptionMethod = "PlacesDetailsDao :: getSessionFactory() ::";
+			logger.log(Level.SEVERE,exceptionMethod,e);
 		}
 		return null;
 	}
@@ -47,7 +48,8 @@ public class PlacesDetailsDao {
 
 			return restaurantPojoList;
 		}catch(Exception e){
-			logger.log(Level.SEVERE,"PlacesDetailsDao :: getAllPlacesDetailsPojoList() :: Exception :: ",e);
+			String exceptionMethod = "PlacesDetailsDao :: getAllPlacesDetailsPojoList() ::";
+			logger.log(Level.SEVERE,exceptionMethod,e);
 			throw e;
 		}finally{
 			if(session != null){
@@ -63,29 +65,30 @@ public class PlacesDetailsDao {
 	 * @param restaurantDetailsPojo
 	 * @return PlacesDetailsPojo
 	 */
-	public PlacesDetailsPojo savePlacesDetailsPojo(PlacesDetailsPojo proxyPojo) {
+	public PlacesDetailsPojo savePlacesDetailsPojo(PlacesDetailsPojo placesDetailsPojo) {
 		Session session=null;
 		Transaction transaction= null;
 		try {
-			proxyPojo.setModifiedOn(new Date());
+			placesDetailsPojo.setModifiedOn(new Date());
 			session = HibernateUtil.getSessionFactory().openSession();
 			transaction = session.beginTransaction();
-			if(proxyPojo.getId()!=null && proxyPojo.getId()!=0){
-				proxyPojo = (PlacesDetailsPojo) session.merge(proxyPojo);
+			if(placesDetailsPojo.getId()!=null && placesDetailsPojo.getId()!=0){
+				placesDetailsPojo = (PlacesDetailsPojo) session.merge(placesDetailsPojo);
 			}
 			else{
-				Long savedId = (Long) session.save(proxyPojo);
+				Long savedId = (Long) session.save(placesDetailsPojo);
 				if(savedId!=0){
-					proxyPojo.setId(savedId);
+					placesDetailsPojo.setId(savedId);
 				}
 				else{
 					return null;
 				}
 			}
 			transaction.commit();
-			return proxyPojo;
+			return placesDetailsPojo;
 		} catch (RuntimeException re) {
-			logger.log(Level.SEVERE,"PlacesDetailsDao :: savePlacesDetailsPojo() :: Exception :: ",re);
+			String exceptionMethod = "PlacesDetailsDao :: savePlacesDetailsPojo() ::";
+			logger.log(Level.SEVERE,exceptionMethod,re);
 			transaction.rollback();
 			throw re;
 		}finally{

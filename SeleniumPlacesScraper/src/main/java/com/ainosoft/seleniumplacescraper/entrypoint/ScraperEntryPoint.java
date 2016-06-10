@@ -24,26 +24,29 @@ public class ScraperEntryPoint {
 
 	private static Logger logger = Logger.getLogger(ScraperEntryPoint.class.getName());
 	private static ProxyStore  proxyStore = new ProxyStore();
-	
+
 	public static void main(String[] args) {
 		SpaceInformationDao spaceInfoDao = null;
 		try {
 			spaceInfoDao = new SpaceInformationDao();
 			
 			ScheduledExecutorService threadSchedulerService = Executors.newScheduledThreadPool(1);
-			threadSchedulerService.scheduleAtFixedRate(proxyStore, 0, 10, TimeUnit.MINUTES);
+			threadSchedulerService.scheduleAtFixedRate(proxyStore, 0, 20, TimeUnit.MINUTES);
 			
-			Thread.sleep(9000);
+			Thread.sleep(15000);
 			
-			//ProxyProvider proxyProvider = new ProxyProvider();
 			ArrayList<ProxyDetailsPojo> proxyDetailsPojoList = proxyStore.getAllproxyDetailsPojoList();
 			
 			List<SpaceInformationPojo> spaceInfoList = spaceInfoDao.getAllSpaceInformationPojoList();
 			for (int i=0;i<spaceInfoList.size();i++) {
 				if(proxyDetailsPojoList!=null){
 					if(!(proxyDetailsPojoList.isEmpty())){
-						Thread scraperManager = new Thread(new ScraperManager("https://www.google.co.in/maps", spaceInfoList.get(i),proxyDetailsPojoList.get(i)));
-						scraperManager.start();						
+						if(!(spaceInfoList.get(i).getCategory_completion_status())){
+							if(spaceInfoList.get(i).getSpaceType()!=null && spaceInfoList.get(i).getSpaceCity()!=null){
+								Thread scraperManager = new Thread(new ScraperManager("https://www.google.co.in/maps", spaceInfoList.get(i),proxyDetailsPojoList.get(i), proxyDetailsPojoList));
+								scraperManager.start();								
+							}
+						}
 					}
 				}
 			}

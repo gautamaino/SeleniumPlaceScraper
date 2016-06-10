@@ -23,15 +23,18 @@ public class SpaceInformationPojo implements java.io.Serializable {
 	private String spaceType;
 	private String spaceCity;
 	private Integer pageCount;
+	private Boolean category_completion_status;
+	
 
 	public SpaceInformationPojo() {
 	}
 
 	public SpaceInformationPojo(String spaceType, String spaceCity,
-			Integer pageCount) {
+			Integer pageCount,Boolean category_completion_status) {
 		this.spaceType = spaceType;
 		this.spaceCity = spaceCity;
 		this.pageCount = pageCount;
+		this.category_completion_status = category_completion_status;
 	}
 
 	@Id
@@ -70,6 +73,15 @@ public class SpaceInformationPojo implements java.io.Serializable {
 
 	public void setPageCount(Integer pageCount) {
 		this.pageCount = pageCount;
+	}
+	
+	@Column(name = "category_completion_status")
+	public Boolean getCategory_completion_status() {
+		return category_completion_status;
+	}
+
+	public void setCategory_completion_status(Boolean category_completion_status) {
+		this.category_completion_status = category_completion_status;
 	}
 
 }
